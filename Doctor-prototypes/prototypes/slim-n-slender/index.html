@@ -1,0 +1,2947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Slim 'n Slender — Diet &amp; Patient Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Gujarati:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   SLIM 'N SLENDER — design tokens
+   Ground: cool mint-white clinic surface.
+   Warmth lives only in the data (turmeric / chilli / jamun),
+   never in the chrome. Neem green carries authority.
+   ============================================================ */
+:root{
+  --ink:#12211C; --ink2:#31463D; --muted:#5C6F67; --faint:#8A9A93;
+  --bg:#F2F5F3; --surface:#FFFFFF; --sunken:#E9EEEB; --line:#DBE3DF; --line2:#C4D1CB;
+  --neem:#0C3B2E; --neem2:#124A3A;
+  --green:#177A5C; --green-soft:#DCEFE7; --green-tint:#EEF7F3;
+  --turmeric:#D99A24; --turmeric-soft:#FAEDD4;
+  --chilli:#C0503C; --chilli-soft:#F8E3DE;
+  --jamun:#6B5CA5; --jamun-soft:#E9E6F5;
+  --info:#2F6E9E; --info-soft:#DEEAF3;
+  --r-s:10px; --r-m:16px; --r-l:22px; --r-pill:999px;
+  --sh-1:0 1px 2px rgba(12,59,46,.06), 0 2px 8px rgba(12,59,46,.05);
+  --sh-2:0 4px 14px rgba(12,59,46,.10), 0 12px 34px rgba(12,59,46,.08);
+  --sh-3:0 18px 50px rgba(12,59,46,.18);
+  --ui:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --dis:'Fraunces',Georgia,'Times New Roman',serif;
+  --guj:'Noto Sans Gujarati','Shruti',sans-serif;
+}
+/* ---------- Gujarati mode ---------- */
+body.gu{font-family:var(--guj);letter-spacing:0}
+body.gu .topbar h1,body.gu .card-h h3,body.gu .phead h2,body.gu .login-art h2,
+body.gu .login-box h3,body.gu .brand-txt b,body.gu .empty h4,body.gu .modal-h h3,
+body.gu .phone-note h2,body.gu .demobar .db-title{font-family:var(--guj);letter-spacing:0}
+body.gu .eyebrow,body.gu .tl-d{letter-spacing:.3px}
+body.gu .stat .v,body.gu .dnum{font-family:var(--dis)}
+body.gu .mrow-kv div,body.gu .stat .k{line-height:1.45}
+body.gu .pill{padding:3px 9px;font-size:11px}
+.langseg{display:flex;background:rgba(255,255,255,.10);border-radius:var(--r-pill);padding:3px}
+.langseg button{padding:5px 13px;border-radius:var(--r-pill);font-size:12.5px;font-weight:700;
+  color:rgba(234,243,239,.72);transition:.16s}
+.langseg button.on{background:#EAF3EF;color:var(--neem)}
+.langseg button:last-child{font-family:var(--guj)}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--ui); background:var(--bg); color:var(--ink);
+  -webkit-font-smoothing:antialiased; font-size:14px; line-height:1.55;
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:99px;border:3px solid var(--bg)}
+:focus-visible{outline:2.5px solid var(--green);outline-offset:2px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- demo chrome ---------- */
+.demobar{
+  position:fixed;top:0;left:0;right:0;height:46px;z-index:900;
+  background:var(--neem);color:#EAF3EF;display:flex;align-items:center;
+  gap:14px;padding:0 16px;box-shadow:0 1px 0 rgba(255,255,255,.08)
+}
+.demobar .db-title{font-family:var(--dis);font-weight:600;font-size:15px;letter-spacing:.1px}
+.demobar .db-title span{opacity:.55;font-family:var(--ui);font-weight:500;font-size:11.5px;
+  letter-spacing:1.4px;text-transform:uppercase;margin-left:10px}
+.db-spacer{flex:1}
+.seg{display:flex;background:rgba(255,255,255,.10);border-radius:var(--r-pill);padding:3px}
+.seg button{
+  padding:5px 15px;border-radius:var(--r-pill);font-size:12.5px;font-weight:600;
+  color:rgba(234,243,239,.72);transition:.16s
+}
+.seg button.on{background:#EAF3EF;color:var(--neem)}
+.dbtn{
+  font-size:12.5px;font-weight:600;color:rgba(234,243,239,.8);
+  border:1px solid rgba(255,255,255,.22);padding:6px 13px;border-radius:var(--r-pill);transition:.16s
+}
+.dbtn:hover{background:rgba(255,255,255,.12);color:#fff}
+.stage{padding-top:46px}
+
+/* ---------- doctor shell ---------- */
+.dsk{display:flex;min-height:calc(100vh - 46px)}
+.side{
+  width:238px;flex-shrink:0;background:var(--neem);color:#DDEAE4;
+  display:flex;flex-direction:column;position:sticky;top:46px;height:calc(100vh - 46px)
+}
+.brand{padding:22px 20px 18px;display:flex;align-items:center;gap:11px}
+.brand-mark{
+  width:38px;height:38px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(145deg,#2E9E77,#0E5642);
+  display:grid;place-items:center;font-family:var(--dis);font-weight:700;color:#fff;font-size:17px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.28)
+}
+.brand-txt b{display:block;font-family:var(--dis);font-size:15.5px;font-weight:600;color:#fff;line-height:1.15}
+.brand-txt i{display:block;font-style:normal;font-size:10.5px;letter-spacing:1.5px;
+  text-transform:uppercase;color:rgba(221,234,228,.55);margin-top:2px}
+.navsec{padding:6px 12px 2px;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;
+  color:rgba(221,234,228,.38);font-weight:700;margin-top:12px}
+.nav{padding:0 10px;display:flex;flex-direction:column;gap:1px}
+.nav button{
+  display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+  padding:9px 12px;border-radius:10px;font-size:13.5px;font-weight:500;
+  color:rgba(221,234,228,.74);transition:.15s
+}
+.nav button:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav button.on{background:rgba(255,255,255,.13);color:#fff;font-weight:600}
+.nav .ic{width:17px;height:17px;flex-shrink:0;opacity:.9}
+.nav .badge{margin-left:auto;background:var(--turmeric);color:#3A2A05;font-size:10.5px;
+  font-weight:800;padding:1px 7px;border-radius:99px}
+.side-foot{margin-top:auto;padding:14px;border-top:1px solid rgba(255,255,255,.10)}
+.who{display:flex;align-items:center;gap:10px}
+.who .av{width:34px;height:34px;border-radius:50%;background:#2E9E77;display:grid;place-items:center;
+  color:#fff;font-weight:700;font-size:13px;flex-shrink:0}
+.who b{display:block;font-size:12.8px;color:#fff;font-weight:600;line-height:1.2}
+.who span{display:block;font-size:11px;color:rgba(221,234,228,.5)}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{
+  height:66px;background:var(--surface);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;padding:0 28px;gap:16px;position:sticky;top:46px;z-index:40
+}
+.topbar h1{font-family:var(--dis);font-size:20px;font-weight:600;margin:0;letter-spacing:-.2px}
+.topbar .sub{color:var(--muted);font-size:12.5px;margin-top:1px}
+.tb-spacer{flex:1}
+.content{padding:26px 28px 60px;max-width:1320px;width:100%}
+
+/* ---------- primitives ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:var(--r-pill);
+  font-size:13px;font-weight:600;transition:.16s;white-space:nowrap
+}
+.btn-pri{background:var(--green);color:#fff;box-shadow:0 1px 3px rgba(23,122,92,.3)}
+.btn-pri:hover{background:#14684E}
+.btn-gho{background:var(--surface);color:var(--ink2);border:1px solid var(--line2)}
+.btn-gho:hover{border-color:var(--green);color:var(--green)}
+.btn-qui{color:var(--muted);padding:8px 12px}
+.btn-qui:hover{color:var(--green);background:var(--green-tint)}
+.btn-dan{background:var(--chilli-soft);color:var(--chilli)}
+.btn-dan:hover{background:#F3D3CC}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);box-shadow:var(--sh-1)}
+.card-p{padding:20px}
+.card-h{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.card-h h3{margin:0;font-size:14.5px;font-weight:700;letter-spacing:-.1px}
+.card-h .hint{font-size:12px;color:var(--faint);font-weight:500}
+
+.eyebrow{font-size:10.5px;letter-spacing:1.7px;text-transform:uppercase;color:var(--faint);font-weight:700}
+.dnum{font-family:var(--dis);font-weight:600;letter-spacing:-1px;line-height:1}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:var(--r-pill);
+  font-size:11.5px;font-weight:700}
+.p-grn{background:var(--green-soft);color:#0E5642}
+.p-tur{background:var(--turmeric-soft);color:#8A5D08}
+.p-chi{background:var(--chilli-soft);color:#9A3B2A}
+.p-jam{background:var(--jamun-soft);color:#4E4180}
+.p-inf{background:var(--info-soft);color:#1D4F74}
+.p-gry{background:var(--sunken);color:var(--muted)}
+
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.row{display:flex;align-items:center;gap:12px}
+.mt{margin-top:22px}
+
+.inp{
+  width:100%;padding:10px 13px;border:1px solid var(--line2);border-radius:var(--r-s);
+  background:var(--surface);font-size:13.5px;transition:.15s
+}
+.inp:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+.lbl{display:block;font-size:11.5px;font-weight:700;color:var(--ink2);margin-bottom:6px;letter-spacing:.2px}
+.field{margin-bottom:15px}
+
+table{width:100%;border-collapse:collapse}
+th{
+  text-align:left;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--faint);font-weight:700;padding:10px 16px;border-bottom:1px solid var(--line);background:#FAFCFB
+}
+td{padding:13px 16px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:middle}
+tbody tr{transition:.13s}
+tbody tr:hover{background:var(--green-tint)}
+tbody tr:last-child td{border-bottom:none}
+.tclick{cursor:pointer}
+
+.av-sm{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  font-weight:700;font-size:12.5px;flex-shrink:0}
+
+/* ---------- stat tiles ---------- */
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);
+  padding:17px 18px;box-shadow:var(--sh-1);position:relative;overflow:hidden}
+.stat .k{font-size:11.5px;color:var(--muted);font-weight:600}
+.stat .v{font-family:var(--dis);font-size:31px;font-weight:600;letter-spacing:-1.2px;margin-top:5px;line-height:1}
+.stat .d{font-size:11.5px;color:var(--faint);margin-top:5px}
+.stat .edge{position:absolute;left:0;top:0;bottom:0;width:3px}
+
+/* ---------- timeline ---------- */
+.tl{position:relative;padding-left:30px}
+.tl:before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl-i{position:relative;padding-bottom:20px}
+.tl-i:last-child{padding-bottom:0}
+.tl-i:before{
+  content:'';position:absolute;left:-26px;top:5px;width:11px;height:11px;border-radius:50%;
+  background:var(--surface);border:2.5px solid var(--green)
+}
+.tl-i.dim:before{border-color:var(--line2)}
+.tl-d{font-size:11px;color:var(--faint);font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.tl-t{font-size:13.5px;font-weight:600;margin-top:2px}
+.tl-s{font-size:12.5px;color:var(--muted);margin-top:2px}
+
+/* ---------- plan builder ---------- */
+.slot{border:1px solid var(--line);border-radius:var(--r-m);background:var(--surface);margin-bottom:12px;overflow:hidden}
+.slot-h{display:flex;align-items:center;gap:10px;padding:11px 15px;background:#FAFCFB;border-bottom:1px solid var(--line)}
+.slot-h b{font-size:13px;font-weight:700}
+.slot-h .time{font-size:11.5px;color:var(--faint);font-weight:600}
+.slot-h .kc{margin-left:auto;font-size:12px;font-weight:700;color:var(--green)}
+.slot-b{padding:9px 15px 13px}
+.fitem{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.fitem:last-child{border-bottom:none}
+.fitem .nm{font-size:13px;font-weight:500}
+.fitem .qt{font-size:11.5px;color:var(--faint)}
+.fitem .cal{margin-left:auto;font-size:12px;color:var(--muted);font-weight:600}
+.fitem .x{color:var(--faint);padding:2px 6px;border-radius:6px;font-size:15px;line-height:1}
+.fitem .x:hover{background:var(--chilli-soft);color:var(--chilli)}
+.addbar{display:flex;gap:8px;margin-top:9px}
+.addbar select{flex:1;padding:8px 11px;border:1px solid var(--line2);border-radius:var(--r-s);
+  font-size:12.5px;background:var(--surface)}
+
+/* ---------- phone ---------- */
+.phone-stage{display:flex;flex-direction:column;align-items:center;padding:22px 20px 50px;min-height:calc(100vh - 46px)}
+.phone-note{max-width:470px;text-align:center;margin-bottom:16px}
+.phone-note h2{font-family:var(--dis);font-size:22px;font-weight:600;margin:0 0 5px;letter-spacing:-.3px}
+.phone-note p{margin:0;color:var(--muted);font-size:13px}
+.phone{
+  width:392px;height:788px;background:#0B1512;border-radius:46px;padding:11px;
+  box-shadow:var(--sh-3),0 0 0 2px #22312C;flex-shrink:0;position:relative
+}
+.phone-screen{
+  width:100%;height:100%;background:var(--bg);border-radius:36px;overflow-y:auto;
+  overflow-x:hidden;position:relative;scrollbar-width:none
+}
+.phone-screen::-webkit-scrollbar{display:none}
+.notch{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:126px;height:27px;
+  background:#0B1512;border-radius:0 0 17px 17px;z-index:30}
+.pstat{height:44px;display:flex;align-items:flex-end;justify-content:space-between;
+  padding:0 22px 5px;font-size:11.5px;font-weight:700;color:var(--ink)}
+
+.psec{padding:0 18px}
+.phead{padding:14px 18px 12px;display:flex;align-items:center;gap:11px}
+.phead h2{font-family:var(--dis);font-size:20px;font-weight:600;margin:0;letter-spacing:-.3px;flex:1}
+.pback{width:33px;height:33px;border-radius:50%;background:var(--surface);border:1px solid var(--line);
+  display:grid;place-items:center;flex-shrink:0}
+.ptabs{
+  position:sticky;bottom:0;display:flex;background:rgba(255,255,255,.94);
+  backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:7px 6px 22px;z-index:20
+}
+.ptabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  font-size:10px;font-weight:600;color:var(--faint);padding:5px 0;border-radius:10px}
+.ptabs button.on{color:var(--green)}
+.ptabs button span{white-space:nowrap}
+body.gu .ptabs button{font-size:9px}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);
+  box-shadow:var(--sh-1);margin-bottom:12px;overflow:hidden}
+
+.meal{display:flex;gap:12px;padding:13px 14px;align-items:flex-start}
+.meal .tick{width:25px;height:25px;border-radius:50%;border:2px solid var(--line2);flex-shrink:0;
+  display:grid;place-items:center;margin-top:1px;transition:.16s;background:var(--surface)}
+.meal .tick.on{background:var(--green);border-color:var(--green)}
+.meal .slotname{font-size:10.5px;letter-spacing:1.3px;text-transform:uppercase;color:var(--faint);font-weight:700}
+.meal .items{font-size:13.5px;font-weight:600;margin-top:3px;line-height:1.4}
+.meal .kcal{font-size:11.5px;color:var(--muted);margin-top:3px}
+.chev{color:var(--line2);flex-shrink:0;align-self:center}
+
+/* ---------- misc ---------- */
+.bar{height:9px;background:var(--sunken);border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:99px;background:var(--green)}
+.legend{display:flex;flex-wrap:wrap;gap:10px 16px}
+.legend div{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);font-weight:600}
+.legend i{width:9px;height:9px;border-radius:3px;display:block}
+.empty{text-align:center;padding:46px 20px;color:var(--muted)}
+.empty h4{font-family:var(--dis);font-size:17px;margin:10px 0 5px;color:var(--ink);font-weight:600}
+.empty p{margin:0 0 16px;font-size:13px}
+
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(90px);
+  background:var(--neem);color:#EAF3EF;padding:11px 20px;border-radius:var(--r-pill);
+  font-size:13px;font-weight:600;box-shadow:var(--sh-2);z-index:999;transition:.28s;opacity:0
+}
+.toast.on{transform:translateX(-50%) translateY(0);opacity:1}
+
+.modal-bg{position:fixed;inset:0;background:rgba(12,33,28,.5);z-index:950;display:grid;
+  place-items:center;padding:20px;backdrop-filter:blur(3px)}
+.modal{background:var(--surface);border-radius:var(--r-l);box-shadow:var(--sh-3);
+  width:100%;max-width:440px;overflow:hidden}
+.modal-h{padding:20px 22px 0}
+.modal-h h3{font-family:var(--dis);font-size:19px;font-weight:600;margin:0 0 5px}
+.modal-h p{margin:0;color:var(--muted);font-size:13px}
+.modal-b{padding:18px 22px}
+/* ---------- printable diet chart (added 3 Sep 2026) ---------- */
+#printArea{display:none}
+.modal.wide{max-width:740px;max-height:88vh;display:flex;flex-direction:column}
+.modal.wide .modal-b{overflow:auto;flex:1}
+.chart{background:#fff;color:#12211C;font-family:var(--ui)}
+.chart-head{display:flex;align-items:flex-start;gap:14px;border-bottom:2.5px solid var(--neem);padding-bottom:12px}
+.chart-head .cm{width:46px;height:46px;border-radius:14px;flex-shrink:0;
+  background:linear-gradient(145deg,#2E9E77,#0E5642);display:grid;place-items:center;
+  font-family:var(--dis);font-weight:700;color:#fff;font-size:21px}
+.chart-head h1{font-family:var(--dis);font-size:21px;font-weight:600;margin:0;letter-spacing:-.3px}
+.chart-head .sub{font-size:12px;color:var(--muted);margin-top:2px}
+.chart-head .rt{margin-left:auto;text-align:right;font-size:11.5px;color:var(--muted);line-height:1.6}
+.chart-head .rt b{display:block;font-size:13.5px;color:var(--ink)}
+.cmeta{display:flex;flex-wrap:wrap;gap:0 26px;padding:11px 0;border-bottom:1px solid var(--line);margin-bottom:4px}
+.cmeta div{font-size:11.5px;color:var(--faint);font-weight:600}
+.cmeta b{display:block;font-size:13.5px;color:var(--ink);font-weight:700;margin-top:1px}
+table.ctab{width:100%;border-collapse:collapse;margin:10px 0 0}
+table.ctab th{background:var(--neem);color:#fff;font-size:10px;letter-spacing:1px;text-transform:uppercase;
+  text-align:left;padding:7px 10px;font-weight:700}
+table.ctab td{padding:9px 10px;border-bottom:1px solid var(--line);font-size:12.5px;vertical-align:top}
+table.ctab tr:nth-child(even) td{background:#FAFCFB}
+table.ctab .r{text-align:right}
+table.ctab .slotc{font-weight:700;white-space:nowrap;width:112px}
+table.ctab .timec{color:var(--faint);font-size:11.5px;white-space:nowrap;width:74px}
+table.ctab tfoot td{background:var(--green-tint) !important;font-weight:700;font-size:13px;border-top:2px solid var(--green)}
+.cmacros{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.cnote{margin-top:12px;padding:11px 13px;background:var(--turmeric-soft);border-radius:10px;
+  font-size:12.5px;color:#7A5209;line-height:1.6}
+.cfoot{margin-top:14px;padding-top:10px;border-top:1px solid var(--line);
+  font-size:11px;color:var(--faint);display:flex;justify-content:space-between;gap:12px}
+@media print{
+  body{background:#fff}
+  body > *{display:none !important}
+  body > #printArea{display:block !important}
+  .pgbreak{page-break-after:always}
+  .chart{padding:0}
+  @page{size:A4;margin:14mm}
+}
+.modal-f{padding:14px 22px;background:#FAFCFB;border-top:1px solid var(--line);
+  display:flex;gap:10px;justify-content:flex-end}
+
+/* ---------- login ---------- */
+.login-wrap{min-height:calc(100vh - 46px);display:grid;grid-template-columns:1.05fr .95fr}
+.login-art{background:var(--neem);color:#DDEAE4;padding:56px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.login-art:after{content:'';position:absolute;right:-160px;bottom:-160px;width:460px;height:460px;
+  border-radius:50%;background:radial-gradient(circle,rgba(46,158,119,.30),transparent 68%)}
+.login-art h2{font-family:var(--dis);font-size:38px;font-weight:600;line-height:1.16;
+  margin:auto 0 16px;max-width:430px;letter-spacing:-.9px;color:#fff;position:relative}
+.login-art p{max-width:390px;font-size:14.5px;color:rgba(221,234,228,.72);margin:0 0 auto;position:relative}
+.login-form{display:grid;place-items:center;padding:40px;background:var(--surface)}
+.login-box{width:100%;max-width:352px}
+.login-box h3{font-family:var(--dis);font-size:26px;font-weight:600;margin:0 0 6px;letter-spacing:-.5px}
+.login-box>p{color:var(--muted);margin:0 0 26px;font-size:13.5px}
+.hintbox{background:var(--turmeric-soft);border-radius:var(--r-s);padding:11px 14px;
+  font-size:12px;color:#7A5209;margin-top:18px;line-height:1.5}
+
+/* ---------- screen index ---------- */
+.idx{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.idx button{
+  text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);
+  padding:15px 16px;box-shadow:var(--sh-1);transition:.16s
+}
+.idx button:hover{border-color:var(--green);transform:translateY(-2px);box-shadow:var(--sh-2)}
+.idx .n{font-size:10.5px;letter-spacing:1.4px;color:var(--faint);font-weight:700}
+.idx .t{font-size:14px;font-weight:700;margin-top:5px}
+.idx .s{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.45}
+
+/* ---------- mobile: bottom tab bar (doctor) ---------- */
+.mnav{display:none}
+.sheet-bg{position:fixed;inset:0;background:rgba(12,33,28,.5);z-index:940;backdrop-filter:blur(3px)}
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;background:var(--surface);z-index:941;
+  border-radius:22px 22px 0 0;padding:10px 12px 30px;box-shadow:var(--sh-3);
+  animation:up .22s cubic-bezier(.2,.8,.3,1)
+}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-grip{width:38px;height:4px;background:var(--line2);border-radius:99px;margin:4px auto 12px}
+.sheet button{
+  display:flex;align-items:center;gap:13px;width:100%;text-align:left;padding:13px 14px;
+  border-radius:12px;font-size:15px;font-weight:600;color:var(--ink)
+}
+.sheet button:active{background:var(--green-tint)}
+.sheet button .ic{width:19px;height:19px;color:var(--green)}
+.sheet hr{border:none;border-top:1px solid var(--line);margin:8px 6px}
+
+/* ---------- mobile: record cards that replace tables ---------- */
+.mrow{
+  display:flex;gap:12px;width:100%;text-align:left;align-items:flex-start;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);
+  padding:14px;box-shadow:var(--sh-1);margin-bottom:10px
+}
+.mrow:active{border-color:var(--green);background:var(--green-tint)}
+.mrow-b{flex:1;min-width:0}
+.mrow-t{font-size:15px;font-weight:700;letter-spacing:-.1px}
+.mrow-s{font-size:12.5px;color:var(--muted);margin-top:2px}
+.mrow-kv{display:flex;gap:14px;margin-top:9px;flex-wrap:wrap}
+.mrow-kv div{font-size:12px;color:var(--faint);font-weight:600}
+.mrow-kv b{display:block;font-size:14px;color:var(--ink);font-weight:700;margin-top:1px}
+
+@media(max-width:1080px){
+  .g4{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:1fr}
+  .login-wrap{grid-template-columns:1fr} .login-art{display:none}
+}
+
+@media(max-width:900px){
+  body{font-size:15px}
+  .demobar{height:56px;padding:0 12px;gap:10px}
+  .demobar .db-title{font-size:14px}
+  .demobar .db-title span{display:none}
+  .dbtn{display:none}
+  .seg button{padding:9px 19px;font-size:13px}
+  .btn-gho.btn-sm{padding:9px 14px}
+  .stage{padding-top:56px}
+
+  .side{display:none}
+  .dsk{min-height:calc(100vh - 56px)}
+  .topbar{
+    height:auto;position:sticky;top:56px;padding:12px 16px 0;
+    flex-direction:column;align-items:stretch;gap:0
+  }
+  .topbar h1{font-size:22px}
+  .topbar .sub{font-size:12.5px;line-height:1.4}
+  .tb-spacer{display:none}
+  #pgActions{
+    display:flex;gap:8px;overflow-x:auto;padding:12px 0 12px;margin:0 -16px;
+    padding-left:16px;padding-right:16px;scrollbar-width:none
+  }
+  #pgActions::-webkit-scrollbar{display:none}
+  #pgActions .inp{width:auto;min-width:150px}
+  .content{padding:16px 16px 104px}
+  .g4{grid-template-columns:repeat(2,1fr)} .g2,.g3{grid-template-columns:1fr}
+  /* inline grid ratios are set per-screen for desktop — collapse them all on a phone */
+  .grid[style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  .g2.keep2{grid-template-columns:repeat(2,1fr)!important}
+  .grid{gap:11px}
+  .addbar select{min-width:0}
+  .toast{bottom:88px;max-width:calc(100vw - 32px);text-align:center}
+
+  .stat{padding:14px 15px}
+  .stat .v{font-size:26px}
+  .card-h{padding:14px 16px}
+  .card-p{padding:16px}
+
+  /* comfortable tap targets */
+  .btn{padding:11px 17px;font-size:14px}
+  .btn-sm{padding:8px 13px;font-size:13px}
+  .inp{padding:12px 14px;font-size:15px}
+  .addbar select{padding:11px 12px;font-size:14px}
+
+  /* any table that survives becomes swipeable rather than cut off */
+  .card>table{display:block;overflow-x:auto;white-space:nowrap}
+
+  .mnav{
+    display:flex;position:fixed;left:0;right:0;bottom:0;z-index:60;
+    background:rgba(255,255,255,.96);backdrop-filter:blur(14px);
+    border-top:1px solid var(--line);padding:7px 4px 18px
+  }
+  .mnav button{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+    font-size:10.5px;font-weight:600;color:var(--faint);padding:5px 0;border-radius:10px
+  }
+  .mnav button.on{color:var(--green)}
+  .mnav .ic{width:21px;height:21px}
+
+  /* patient view: drop the phone mock, go full screen */
+  .phone-stage{padding:0;display:block}
+  .phone-note{display:none}
+  .phone{
+    width:100%;max-width:none;height:auto;min-height:calc(100vh - 56px);
+    background:var(--bg);border-radius:0;padding:0;box-shadow:none
+  }
+  .phone-screen{border-radius:0;height:auto;min-height:calc(100vh - 56px);overflow:visible}
+  .notch,.pstat{display:none}
+  .ptabs{position:fixed;left:0;right:0;bottom:0;padding:7px 6px 18px}
+  .psec{padding:0 16px 96px}
+  .phead{padding:16px 16px 12px}
+  .phead h2{font-size:23px}
+  .meal .items{font-size:15px}
+  .login-form{padding:24px 18px}
+  .modal{max-width:none;border-radius:20px}
+}
+@media(max-width:359px){
+  .g4{grid-template-columns:1fr}
+  .mnav button{font-size:9.5px}
+}
+</style>
+</head>
+<body>
+<div class="demobar">
+  <div class="db-title">Slim 'n Slender <span>Prototype &middot; rev 2 &middot; 28 Aug 2026</span></div>
+  <div class="db-spacer"></div>
+  <div class="seg">
+    <button id="mode-doc" class="on" onclick="setMode('doc')">Doctor</button>
+    <button id="mode-pat" onclick="setMode('pat')">Patient</button>
+  </div>
+  <div class="langseg" title="The whole application in either language">
+    <button id="lang-en" class="on" onclick="setLang('en')">English</button>
+    <button id="lang-gu" onclick="setLang('gu')">&#2711;&#2753;&#2716;&#2736;&#2750;&#2724;&#2752;</button>
+  </div>
+  <button class="dbtn" onclick="go('index')">All screens</button>
+  <button class="dbtn" onclick="resetDemo()">Reset demo</button>
+</div>
+
+<div class="stage">
+  <!-- ============ DOCTOR ============ -->
+  <div id="docApp" style="display:none">
+    <div class="dsk">
+      <aside class="side">
+        <div class="brand">
+          <div class="brand-mark">S</div>
+          <div class="brand-txt"><b>Slim 'n Slender</b><i>Junagadh</i></div>
+        </div>
+
+        <div class="navsec">Daily work</div>
+        <div class="nav" id="nav1"></div>
+        <div class="navsec">Your libraries</div>
+        <div class="nav" id="nav2"></div>
+        <div class="navsec">Money &amp; history</div>
+        <div class="nav" id="nav3"></div>
+        <div class="navsec">Safety</div>
+        <div class="nav" id="nav4"></div>
+
+        <div class="side-foot">
+          <div class="who">
+            <div class="av">NG</div>
+            <div><b>Dr. Nitee Gadhvi</b><span>Consulting dietician</span></div>
+          </div>
+        </div>
+      </aside>
+
+      <div class="main">
+        <header class="topbar">
+          <div>
+            <h1 id="pgTitle">Today</h1>
+            <div class="sub" id="pgSub"></div>
+          </div>
+          <div class="tb-spacer"></div>
+          <div id="pgActions" class="row"></div>
+        </header>
+        <div class="content" id="docContent"></div>
+      </div>
+    </div>
+    <nav class="mnav" id="mnav"></nav>
+  </div>
+
+  <!-- ============ DOCTOR LOGIN ============ -->
+  <div id="docLogin">
+    <div class="login-wrap">
+      <div class="login-art">
+        <div class="brand" style="padding:0">
+          <div class="brand-mark">S</div>
+          <div class="brand-txt"><b>Slim 'n Slender</b><i>Junagadh</i></div>
+        </div>
+        <h2>Every patient file, every diet chart, every kilo — in one place.</h2>
+        <p>The paper file stays in the cupboard. This opens on any phone or laptop, and nothing in it can ever be deleted by accident.</p>
+      </div>
+      <div class="login-form">
+        <div class="login-box">
+          <h3>Sign in</h3>
+          <p>Welcome back, Doctor.</p>
+          <div class="field">
+            <label class="lbl">Mobile number</label>
+            <input class="inp" value="98240 00000" readonly>
+          </div>
+          <div class="field">
+            <label class="lbl">Password</label>
+            <input class="inp" type="password" value="demo1234" readonly>
+          </div>
+          <button class="btn btn-pri" style="width:100%;justify-content:center;margin-top:6px"
+            onclick="doctorIn()">Sign in to my clinic</button>
+          <div class="hintbox"><b>This is a demonstration.</b> The details are already filled in — just press
+            Sign in. Nothing here is a real patient record.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PATIENT ============ -->
+  <div id="patApp" style="display:none">
+    <div class="phone-stage">
+      <div class="phone-note">
+        <h2>What your patient sees</h2>
+        <p>She opens a link you send her once, and taps "Add to Home Screen". After that it opens like any
+           app on her phone. There is nothing to download from a store.</p>
+      </div>
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="phone-screen" id="patScreen"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="printArea"></div>
+<div id="modalHost"></div>
+<script>
+/* =========================================================
+   DEMO DATA
+   Household measures, because that is how the clinic works.
+   Values follow ICMR-NIN style figures, rounded for the demo.
+   ========================================================= */
+const SLOTS = [
+  {id:'em', name:'Early morning', time:'6:30 am'},
+  {id:'bf', name:'Breakfast',     time:'8:30 am'},
+  {id:'mm', name:'Mid-morning',   time:'11:00 am'},
+  {id:'ln', name:'Lunch',         time:'1:30 pm'},
+  {id:'ev', name:'Evening',       time:'4:30 pm'},
+  {id:'dn', name:'Dinner',        time:'8:00 pm'},
+  {id:'bd', name:'Bedtime',       time:'10:00 pm'}
+];
+
+// kcal, protein, carbs, fat, fibre  (per stated measure)
+let FOODS = [
+  {id:1,  n:'Boiled moong',        m:'1 katori',   c:105, p:7.0,  cb:19,  f:0.4, fb:5.4, g:'Pulses',  v:1},
+  {id:2,  n:'Moong dal khichdi',   m:'1 katori',   c:185, p:6.8,  cb:32,  f:3.2, fb:2.6, g:'Cereals', v:1},
+  {id:3,  n:'Bajra rotla',         m:'1 medium',   c:120, p:3.4,  cb:24,  f:1.2, fb:2.9, g:'Cereals', v:1},
+  {id:4,  n:'Jowar rotli',         m:'1 medium',   c:96,  p:2.8,  cb:20,  f:0.8, fb:2.2, g:'Cereals', v:1},
+  {id:5,  n:'Methi thepla',        m:'1 medium',   c:118, p:3.1,  cb:17,  f:4.2, fb:2.4, g:'Cereals', v:1},
+  {id:6,  n:'Plain khakhra',       m:'1 piece',    c:62,  p:1.9,  cb:11,  f:1.3, fb:1.1, g:'Snacks',  v:1},
+  {id:7,  n:'Vegetable poha',      m:'1 katori',   c:158, p:3.2,  cb:29,  f:3.4, fb:1.8, g:'Cereals', v:1},
+  {id:8,  n:'Rava upma',           m:'1 katori',   c:172, p:4.1,  cb:28,  f:4.8, fb:1.6, g:'Cereals', v:1},
+  {id:9,  n:'Steamed dhokla',      m:'2 pieces',   c:104, p:4.6,  cb:16,  f:2.4, fb:1.4, g:'Snacks',  v:1},
+  {id:10, n:'Toor dal',            m:'1 katori',   c:128, p:7.4,  cb:18,  f:2.8, fb:4.1, g:'Pulses',  v:1},
+  {id:11, n:'Chana chaat',         m:'1 katori',   c:142, p:7.8,  cb:21,  f:3.1, fb:6.2, g:'Pulses',  v:1},
+  {id:12, n:'Sprouted matki',      m:'1 katori',   c:98,  p:6.4,  cb:16,  f:0.6, fb:5.0, g:'Pulses',  v:1},
+  {id:13, n:'Lauki sabzi',         m:'1 katori',   c:58,  p:1.4,  cb:7,   f:2.6, fb:2.1, g:'Veg',     v:1},
+  {id:14, n:'Tindora sabzi',       m:'1 katori',   c:64,  p:1.6,  cb:8,   f:2.9, fb:2.4, g:'Veg',     v:1},
+  {id:15, n:'Palak sabzi',         m:'1 katori',   c:72,  p:3.2,  cb:6,   f:3.6, fb:3.1, g:'Veg',     v:1},
+  {id:16, n:'Mixed veg salad',     m:'1 plate',    c:46,  p:1.8,  cb:8,   f:0.4, fb:3.4, g:'Veg',     v:1},
+  {id:17, n:'Cucumber sticks',     m:'1 katori',   c:22,  p:0.7,  cb:4,   f:0.1, fb:1.2, g:'Veg',     v:1},
+  {id:18, n:'Low-fat curd',        m:'1 katori',   c:76,  p:5.2,  cb:7,   f:2.8, fb:0,   g:'Dairy',   v:1},
+  {id:19, n:'Chaas (no salt)',     m:'1 glass',    c:42,  p:2.6,  cb:4,   f:1.4, fb:0,   g:'Dairy',   v:1},
+  {id:20, n:'Toned milk',          m:'1 glass',    c:118, p:6.2,  cb:11,  f:5.1, fb:0,   g:'Dairy',   v:1},
+  {id:21, n:'Paneer bhurji',       m:'1 katori',   c:196, p:11.4, cb:5,   f:14.2,fb:0.4, g:'Dairy',   v:1},
+  {id:22, n:'Boiled egg white',    m:'2 pieces',   c:34,  p:7.2,  cb:0.6, f:0.1, fb:0,   g:'Protein', v:0},
+  {id:23, n:'Grilled chicken',     m:'100 g',      c:165, p:31.0, cb:0,   f:3.6, fb:0,   g:'Protein', v:0},
+  {id:24, n:'Warm water + lemon',  m:'1 glass',    c:8,   p:0.1,  cb:2,   f:0,   fb:0.2, g:'Drinks',  v:1},
+  {id:25, n:'Methi seed water',    m:'1 glass',    c:12,  p:0.4,  cb:2,   f:0.1, fb:0.9, g:'Drinks',  v:1},
+  {id:26, n:'Green tea',           m:'1 cup',      c:4,   p:0,    cb:1,   f:0,   fb:0,   g:'Drinks',  v:1},
+  {id:27, n:'Soaked almonds',      m:'5 pieces',   c:35,  p:1.3,  cb:1.3, f:3.0, fb:0.6, g:'Nuts',    v:1},
+  {id:28, n:'Walnut halves',       m:'4 pieces',   c:52,  p:1.2,  cb:1.1, f:5.2, fb:0.5, g:'Nuts',    v:1},
+  {id:29, n:'Roasted chana',       m:'1 mutthi',   c:88,  p:4.8,  cb:14,  f:1.4, fb:3.6, g:'Snacks',  v:1},
+  {id:30, n:'Papaya cubes',        m:'1 katori',   c:52,  p:0.6,  cb:12,  f:0.2, fb:1.8, g:'Fruit',   v:1},
+  {id:31, n:'Guava',               m:'1 medium',   c:62,  p:1.4,  cb:14,  f:0.6, fb:5.4, g:'Fruit',   v:1},
+  {id:32, n:'Apple',               m:'1 medium',   c:80,  p:0.4,  cb:21,  f:0.3, fb:3.6, g:'Fruit',   v:1},
+  {id:33, n:'Orange',              m:'1 medium',   c:58,  p:1.1,  cb:14,  f:0.2, fb:2.8, g:'Fruit',   v:1},
+  {id:34, n:'Oats porridge',       m:'1 katori',   c:148, p:5.4,  cb:26,  f:2.8, fb:4.0, g:'Cereals', v:1}
+];
+
+let RECIPES = [
+  {id:1, n:'Moong chilla', s:'1 piece (makes 4)', c:96, p:5.8, cb:13, f:2.4,
+   ing:'Soaked green moong 1 katori · Ginger 1 inch · Green chilli 1 · Coriander a few sprigs · Salt to taste · Oil 1/2 tsp per chilla',
+   mth:'Soak moong 6 hours. Grind with ginger and chilli into a thick batter, no water added. Rest 10 minutes. Spread thin on a hot non-stick tawa, drizzle half a teaspoon of oil, cook both sides until it lifts cleanly.',
+   tag:'High protein'},
+  {id:2, n:'Lauki muthiya', s:'3 pieces', c:132, p:4.2, cb:22, f:3.1,
+   ing:'Grated lauki 1 katori · Jowar flour 3 tbsp · Besan 2 tbsp · Curd 1 tbsp · Turmeric, salt · Oil 1 tsp',
+   mth:'Squeeze the lauki dry and keep the water for the dough. Mix everything into a soft dough. Shape into rolls and steam 15 minutes. Cool, slice, and toss in a pan with mustard seeds.',
+   tag:'Steamed'},
+  {id:3, n:'Methi thepla (low oil)', s:'1 thepla', c:104, p:3.0, cb:17, f:2.8,
+   ing:'Jowar flour 1 katori · Chopped methi 1 katori · Curd 1 tbsp · Turmeric, chilli, salt · Oil 1/2 tsp per thepla',
+   mth:'Knead with curd instead of oil so the dough stays soft. Roll thin. Cook on a hot tawa using half a teaspoon of oil per thepla, no more.',
+   tag:'Everyday'},
+  {id:4, n:'Sprouts and pomegranate bowl', s:'1 katori', c:118, p:6.9, cb:19, f:0.8,
+   ing:'Sprouted matki 1 katori · Pomegranate 2 tbsp · Cucumber 2 tbsp · Lemon · Rock salt · Roasted jeera powder',
+   mth:'Steam the sprouts 5 minutes so they stay crunchy. Cool completely, then fold everything together. Add the lemon only at the time of eating.',
+   tag:'No cooking'},
+  {id:5, n:'Oats and curd bowl', s:'1 katori', c:164, p:8.1, cb:24, f:3.4,
+   ing:'Rolled oats 3 tbsp · Low-fat curd 1 katori · Chia 1 tsp · Papaya cubes 3 tbsp · Cinnamon a pinch',
+   mth:'Soak the oats and chia in the curd overnight in the fridge. Add the fruit in the morning. Do not add sugar; the papaya is enough.',
+   tag:'Night before'},
+  {id:6, n:'Vegetable clear soup', s:'1 bowl', c:48, p:2.1, cb:8, f:0.6,
+   ing:'Lauki, carrot, beans, cabbage 1 katori total · Garlic 2 cloves · Black pepper · Salt · Lemon',
+   mth:'Boil the vegetables in 2 glasses of water with the crushed garlic until soft. Do not strain, the fibre is the point. Finish with pepper and lemon.',
+   tag:'Evening'}
+];
+
+let EXERCISES = [
+  {id:1, n:'Morning walk — brisk pace',  a:'Whole body', d:'30 minutes', vid:'Unlisted · Clinic channel', note:'Before breakfast. Arms swinging, able to talk but not sing.'},
+  {id:2, n:'Surya namaskar — 6 rounds',  a:'Whole body', d:'12 minutes', vid:'Unlisted · Clinic channel', note:'Slow rounds. Stop if the knee hurts.'},
+  {id:3, n:'Wall push-ups',              a:'Upper body', d:'2 sets of 12', vid:'Unlisted · Clinic channel', note:'Feet one big step from the wall. Elbows close to the body.'},
+  {id:4, n:'Chair squats',               a:'Legs',       d:'2 sets of 10', vid:'Unlisted · Clinic channel', note:'Touch the chair, do not sit down fully.'},
+  {id:5, n:'Seated leg raises',          a:'Legs, core', d:'2 sets of 15', vid:'Unlisted · Clinic channel', note:'Good for knees that cannot take standing work.'},
+  {id:6, n:'Deep breathing — pranayama', a:'Breathing',  d:'8 minutes',  vid:'Unlisted · Clinic channel', note:'Last thing at night, sitting up straight.'}
+];
+
+// --------- patients ----------
+function wk(start, drops){ let w=start, out=[{w:start}]; drops.forEach(d=>{ w=+(w-d).toFixed(1); out.push({w}); }); return out; }
+
+let PATIENTS = [
+  {id:1, n:'Meera Trivedi',  age:38, sex:'F', ph:'98251 44xxx', since:'11 Feb 2026', start:78.4, target:66.0,
+   ht:158, pref:'Veg', note:'Desk job, evening hunger is the weak point. Knee pain on stairs.',
+   wts:wk(78.4,[0.9,0.7,0.6,0.8,0.4,0.7,0.5,0.6,0.3,0.5,0.6,0.4,0.5,0.3,0.4,0.5,0.3,0.4,0.3,0.4,0.3,0.2,0.3,0.2,0.3]),
+   adh:[92,88,95,74,86,91,83], active:true},
+  {id:2, n:'Kinjal Dave',    age:29, sex:'F', ph:'99042 71xxx', since:'03 Mar 2026', start:71.2, target:60.0,
+   ht:161, pref:'Veg', note:'PCOS. Irregular meal timings because of shift work.',
+   wts:wk(71.2,[0.6,0.8,0.4,0.5,0.7,0.3,0.6,0.4,0.5,0.4,0.3,0.5,0.4,0.3,0.4,0.3,0.4,0.2,0.3,0.3,0.2]),
+   adh:[78,84,69,88,92,81,76], active:true},
+  {id:3, n:'Hetal Joshi',    age:44, sex:'F', ph:'94268 03xxx', since:'22 Jan 2026', start:84.6, target:70.0,
+   ht:155, pref:'Veg', note:'Borderline sugar. Family cooks separately, so portions are the challenge.',
+   wts:wk(84.6,[1.1,0.8,0.9,0.6,0.7,0.8,0.5,0.6,0.7,0.4,0.6,0.5,0.4,0.5,0.6,0.3,0.4,0.5,0.3,0.4,0.4,0.3,0.4,0.2,0.3,0.3,0.2,0.3]),
+   adh:[96,92,89,94,97,90,93], active:true},
+  {id:4, n:'Rekha Bhatt',    age:52, sex:'F', ph:'98795 22xxx', since:'09 Apr 2026', start:69.8, target:62.0,
+   ht:152, pref:'Veg', note:'Post-menopause. Walks daily already, wants the diet corrected only.',
+   wts:wk(69.8,[0.4,0.5,0.3,0.4,0.6,0.3,0.4,0.3,0.5,0.2,0.3,0.4,0.2,0.3,0.3,0.2,0.3]),
+   adh:[88,91,86,79,90,85,87], active:true},
+  {id:5, n:'Priya Modi',     age:26, sex:'F', ph:'97129 65xxx', since:'18 May 2026', start:64.5, target:56.0,
+   ht:164, pref:'Veg', note:'Wedding in December. Very motivated, tends to over-restrict.',
+   wts:wk(64.5,[0.7,0.6,0.5,0.8,0.4,0.6,0.5,0.4,0.6,0.3,0.4,0.5,0.3]),
+   adh:[97,94,98,92,96,99,95], active:true},
+  {id:6, n:'Falguni Shah',   age:35, sex:'F', ph:'90998 17xxx', since:'27 May 2026', start:76.0, target:64.0,
+   ht:159, pref:'Veg', note:'Two small children, cooks twice daily. Needs simple repeatable meals.',
+   wts:wk(76.0,[0.8,0.5,0.7,0.4,0.6,0.5,0.4,0.5,0.3,0.4,0.4]),
+   adh:[71,68,80,74,66,77,72], active:true},
+  {id:7, n:'Bhavna Pandya',  age:47, sex:'F', ph:'93765 40xxx', since:'02 Jun 2026', start:81.3, target:68.0,
+   ht:157, pref:'Veg', note:'Thyroid, on medication. Slow but steady loss expected.',
+   wts:wk(81.3,[0.5,0.6,0.4,0.5,0.3,0.4,0.5,0.3,0.4]),
+   adh:[84,88,82,90,86,83,89], active:true},
+  {id:8, n:'Nisha Vora',     age:31, sex:'F', ph:'99786 58xxx', since:'14 Dec 2025', start:73.5, target:63.0,
+   ht:160, pref:'Non-veg', note:'Goal reached in June. Now on a maintenance plan, reviewed monthly.',
+   wts:wk(73.5,[0.8,0.9,0.6,0.7,0.5,0.8,0.6,0.5,0.7,0.4,0.6,0.5,0.6,0.4,0.5,0.4,0.3,0.5,0.4,0.3,0.4,0.3,0.2,0.3,0.2,0.1,0.2,0.1,0.1,0.1,0.1,0.1]),
+   adh:[90,93,88,91,94,89,92], active:false}
+];
+
+// starting plan for each patient (slot -> [foodId, qty])
+let PLANS = {
+  1:{em:[[24,1],[27,1]], bf:[[7,1],[19,1]], mm:[[31,1]], ln:[[4,2],[10,1],[13,1],[16,1]],
+     ev:[[26,1],[29,1]], dn:[[3,1],[15,1],[18,1]], bd:[[20,1]]},
+  2:{em:[[25,1]], bf:[[34,1],[27,1]], mm:[[12,1]], ln:[[4,2],[10,1],[14,1],[16,1]],
+     ev:[[26,1],[6,1]], dn:[[1,1],[15,1]], bd:[[19,1]]},
+  3:{em:[[24,1],[28,1]], bf:[[9,1],[19,1]], mm:[[30,1]], ln:[[3,1],[10,1],[13,1],[16,1]],
+     ev:[[26,1],[29,1]], dn:[[2,1],[17,1]], bd:[[19,1]]},
+  4:{em:[[24,1]], bf:[[8,1],[19,1]], mm:[[33,1]], ln:[[4,2],[10,1],[15,1],[16,1]],
+     ev:[[26,1]], dn:[[1,1],[13,1],[18,1]], bd:[[20,1]]},
+  5:{em:[[25,1],[27,1]], bf:[[34,1]], mm:[[12,1]], ln:[[4,2],[11,1],[14,1],[16,1]],
+     ev:[[26,1],[6,1]], dn:[[5,1],[15,1],[18,1]], bd:[[19,1]]},
+  6:{em:[[24,1]], bf:[[7,1],[19,1]], mm:[[32,1]], ln:[[3,1],[10,1],[13,1],[16,1]],
+     ev:[[26,1],[29,1]], dn:[[1,1],[14,1]], bd:[[19,1]]},
+  7:{em:[[24,1],[27,1]], bf:[[9,1],[20,1]], mm:[[31,1]], ln:[[4,2],[10,1],[15,1],[16,1]],
+     ev:[[26,1]], dn:[[2,1],[17,1],[18,1]], bd:[[19,1]]},
+  8:{em:[[24,1]], bf:[[22,1],[6,1]], mm:[[30,1]], ln:[[4,2],[23,1],[16,1]],
+     ev:[[26,1],[28,1]], dn:[[1,1],[15,1]], bd:[[19,1]]}
+};
+
+let PLAN_EX = {1:[1,4],2:[2,5],3:[1,6],4:[1,3],5:[2,4],6:[1,5],7:[1,6],8:[1,2]};
+
+let RECYCLE = [
+  {what:'Patient — Jyoti Raval', by:'Reception', when:'12 Aug 2026, 4:12 pm', left:'88 days'},
+  {what:'Diet plan — Kinjal Dave, 04 Jul', by:'Dr. Nitee Gadhvi', when:'09 Aug 2026, 11:31 am', left:'85 days'},
+  {what:'Food item — Fried mathri', by:'Dr. Nitee Gadhvi', when:'01 Aug 2026, 9:04 am', left:'77 days'}
+];
+
+let AUDIT = [
+  {who:'Dr. Nitee Gadhvi', act:'Issued a new diet plan', obj:'Meera Trivedi', when:'Today, 11:42 am'},
+  {who:'Reception',        act:'Recorded weight 68.2 kg', obj:'Hetal Joshi',   when:'Today, 10:18 am'},
+  {who:'Dr. Nitee Gadhvi', act:'Edited food item',        obj:'Paneer bhurji', when:'Yesterday, 6:55 pm'},
+  {who:'System',           act:'Nightly backup completed', obj:'2,418 records', when:'Today, 2:00 am'},
+  {who:'Reception',        act:'Registered a new patient', obj:'Bhavna Pandya', when:'02 Jun 2026, 12:10 pm'}
+];
+
+let BACKUPS = [
+  {when:'Today, 2:00 am',       type:'Nightly automatic', size:'4.2 MB', st:'ok'},
+  {when:'Yesterday, 2:00 am',   type:'Nightly automatic', size:'4.2 MB', st:'ok'},
+  {when:'12 Aug, 6:40 pm',      type:'Before version update', size:'4.1 MB', st:'ok'},
+  {when:'12 Aug, 2:00 am',      type:'Nightly automatic', size:'4.1 MB', st:'ok'},
+  {when:'01 Aug, 2:00 am',      type:'Monthly kept copy', size:'3.9 MB', st:'keep'}
+];
+</script>
+<script>
+/* ================= state + helpers ================= */
+let MODE='doc', VIEW='today', CUR=1, PAT_VIEW='today', PAT_ID=1, PAT_TICK={}, PLAN_DRAFT=null;
+let HIST_A=4, HIST_B=0, PAT_PLAN=0;   /* plan-history comparison, added 28 Aug 2026 */
+const MOB = () => window.innerWidth < 900;
+const CW  = () => MOB() ? 360 : 760;
+
+const $ = id => document.getElementById(id);
+const food = id => FOODS.find(f=>f.id===id);
+const pat  = id => PATIENTS.find(p=>p.id===id);
+const esc  = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ini  = n => n.split(' ').map(x=>x[0]).slice(0,2).join('');
+const r1   = n => Math.round(n*10)/10;
+
+const AVC=[['#DCEFE7','#0E5642'],['#FAEDD4','#8A5D08'],['#F8E3DE','#9A3B2A'],['#E9E6F5','#4E4180'],['#DEEAF3','#1D4F74']];
+const avc = id => AVC[id % AVC.length];
+
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('on');
+  clearTimeout(t._x); t._x=setTimeout(()=>t.classList.remove('on'),2300); }
+
+function planTotals(plan){
+  let t={c:0,p:0,cb:0,f:0,fb:0};
+  Object.values(plan||{}).filter(Array.isArray).forEach(items=>items.forEach(([fid,q])=>{
+    const f=food(fid); if(!f) return;
+    t.c+=f.c*q; t.p+=f.p*q; t.cb+=f.cb*q; t.f+=f.f*q; t.fb+=f.fb*q;
+  }));
+  Object.keys(t).forEach(k=>t[k]=Math.round(t[k]*10)/10);
+  return t;
+}
+function slotTotal(items){ return Math.round((items||[]).reduce((s,[fid,q])=>s+(food(fid)?.c||0)*q,0)); }
+function lost(p){ return r1(p.start - p.wts[p.wts.length-1].w); }
+function curW(p){ return p.wts[p.wts.length-1].w; }
+function goalPct(p){ return Math.min(100, Math.round(lost(p)/(p.start-p.target)*100)); }
+function bmi(p){ return r1(curW(p)/Math.pow(p.ht/100,2)); }
+function perWk(p){ const n=p.wts.length-1; return n>0? r1(lost(p)/n):0; }
+
+/* ================= mobile record cards ================= */
+function patCard(p, full){
+  return `<button class="mrow" onclick="go('patient',${p.id})">
+    <div class="av-sm" style="width:42px;height:42px;font-size:14px;background:${avc(p.id)[0]};color:${avc(p.id)[1]}">${ini(p.n)}</div>
+    <div class="mrow-b">
+      <div class="row" style="gap:8px"><span class="mrow-t">${p.n}</span>
+        ${p.active?'':'<span class="pill p-gry">Maintenance</span>'}</div>
+      <div class="mrow-s">${p.age} yrs · ${p.pref}${full?' · since '+p.since:''}</div>
+      <div class="mrow-kv">
+        <div>Now<b>${curW(p)} kg</b></div>
+        <div>Lost<b style="color:var(--green)">${lost(p)} kg</b></div>
+        <div>Target<b>${p.target} kg</b></div>
+      </div>
+      <div class="bar" style="margin-top:11px"><i style="width:${goalPct(p)}%"></i></div>
+      <div class="mrow-s" style="margin-top:5px">${goalPct(p)}% of her goal</div>
+    </div></button>`;
+}
+function alertCard(p, why, pill, label){
+  return `<button class="mrow" onclick="go('patient',${p.id})">
+    <div class="av-sm" style="width:42px;height:42px;font-size:14px;background:${avc(p.id)[0]};color:${avc(p.id)[1]}">${ini(p.n)}</div>
+    <div class="mrow-b">
+      <div class="mrow-t">${p.n}</div>
+      <div class="mrow-s">${why}</div>
+      <div class="row" style="justify-content:space-between;margin-top:10px">
+        <span class="pill ${pill}">${label}</span>
+        <b style="font-size:14px">${curW(p)} kg</b></div>
+    </div></button>`;
+}
+function foodCard(f){
+  return `<button class="mrow" data-n="${f.n.toLowerCase()} ${f.g.toLowerCase()}" style="display:block;width:100%;text-align:left"
+      onclick="openFood(${f.id})">
+    <div class="row" style="align-items:center;gap:12px">
+      <div>${pie(f,52)}</div>
+      <div style="flex:1">
+        <div class="mrow-t">${f.n}</div>
+        <div class="mrow-s">${f.m} · ${f.g}${f.v?'':' · non-veg'}</div>
+      </div>
+      <div style="text-align:right"><b style="font-size:19px;font-family:var(--dis);font-weight:600">${f.c}</b>
+        <div style="font-size:10px;color:var(--faint);font-weight:700;letter-spacing:1px">KCAL</div></div>
+    </div>
+    <div class="row" style="gap:6px;margin-top:10px;flex-wrap:wrap">
+      <span class="pill p-grn">P ${f.p} g</span><span class="pill p-tur">C ${f.cb} g</span>
+      <span class="pill p-chi">F ${f.f} g</span><span class="pill p-jam">Fibre ${f.fb} g</span></div>
+  </button>`;
+}
+
+/* ================= SVG charts ================= */
+function donut(t, size, thick){
+  const parts=[['#177A5C',t.p*4,'Protein'],['#D99A24',t.cb*4,'Carbs'],['#C0503C',t.f*9,'Fat']];
+  const tot=parts.reduce((s,x)=>s+x[1],0)||1;
+  const r=(size-thick)/2, C=2*Math.PI*r; let off=0;
+  const rings=parts.map(([col,val])=>{
+    const len=val/tot*C, el=`<circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${col}"
+      stroke-width="${thick}" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}"
+      transform="rotate(-90 ${size/2} ${size/2})" stroke-linecap="butt"/>`;
+    off+=len; return el;
+  }).join('');
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#E9EEEB" stroke-width="${thick}"/>
+    ${rings}
+    <text x="${size/2}" y="${size/2-2}" text-anchor="middle" font-family="Fraunces,serif"
+      font-size="${size*0.20}" font-weight="600" fill="#12211C">${Math.round(t.c)}</text>
+    <text x="${size/2}" y="${size/2+15}" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif"
+      font-size="10" font-weight="700" fill="#8A9A93" letter-spacing="1.2">KCAL</text></svg>`;
+}
+
+/* the signature element: a thali ring — one arc per meal slot of the day */
+function thali(ticked, kcalDone, kcalTarget){
+  const S=196, R=76, T=15, cx=S/2, cy=S/2;
+  const n=SLOTS.length, gap=17, seg=(360/n)-gap;
+  const arcs=SLOTS.map((s,i)=>{
+    const a0=(-90 + i*(360/n) + gap/2)*Math.PI/180;
+    const a1=a0 + seg*Math.PI/180;
+    const x0=cx+R*Math.cos(a0), y0=cy+R*Math.sin(a0);
+    const x1=cx+R*Math.cos(a1), y1=cy+R*Math.sin(a1);
+    const on=ticked[s.id];
+    return `<path d="M ${x0} ${y0} A ${R} ${R} 0 0 1 ${x1} ${y1}" fill="none"
+      stroke="${on?'#177A5C':'#E9EEEB'}" stroke-width="${T}" stroke-linecap="round"/>`;
+  }).join('');
+  const done=SLOTS.filter(s=>ticked[s.id]).length;
+  return `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">
+    ${arcs}
+    <circle cx="${cx}" cy="${cy}" r="${R-T-6}" fill="#FFFFFF" stroke="#DBE3DF"/>
+    <text x="${cx}" y="${cy-10}" text-anchor="middle" font-family="Fraunces,serif" font-size="30"
+      font-weight="600" fill="#12211C">${done}<tspan font-size="17" fill="#8A9A93"> / ${n}</tspan></text>
+    <text x="${cx}" y="${cy+8}" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif"
+      font-size="10.5" font-weight="700" fill="#8A9A93" letter-spacing="1.1">MEALS TAKEN</text>
+    <text x="${cx}" y="${cy+30}" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif"
+      font-size="12" font-weight="700" fill="#177A5C">${kcalDone} of ${kcalTarget} kcal</text></svg>`;
+}
+
+function lineChart(vals, w, h, target, caption){
+  const pad=26, mn=Math.min(...vals,target)-1.2, mx=Math.max(...vals)+1.2, rg=mx-mn||1;
+  const X=i=>pad+i*((w-pad*2)/(vals.length-1||1));
+  const Y=v=>h-pad-((v-mn)/rg)*(h-pad*2);
+  const pts=vals.map((v,i)=>`${X(i)},${Y(v)}`).join(' ');
+  const area=`${X(0)},${h-pad} ${pts} ${X(vals.length-1)},${h-pad}`;
+  const ty=Y(target);
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;display:block">
+    <defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#177A5C" stop-opacity=".22"/>
+      <stop offset="100%" stop-color="#177A5C" stop-opacity="0"/></linearGradient></defs>
+    <line x1="${pad}" y1="${ty}" x2="${w-pad}" y2="${ty}" stroke="#D99A24" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="${w-pad}" y="${ty-7}" text-anchor="end" font-family="Plus Jakarta Sans,sans-serif"
+      font-size="10" font-weight="700" fill="#D99A24">${caption||('TARGET '+target+' kg')}</text>
+    <polygon points="${area}" fill="url(#lg)"/>
+    <polyline points="${pts}" fill="none" stroke="#177A5C" stroke-width="2.4"
+      stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${X(vals.length-1)}" cy="${Y(vals[vals.length-1])}" r="5" fill="#177A5C"
+      stroke="#fff" stroke-width="2.5"/></svg>`;
+}
+
+function barChart(vals, w, h){
+  const pad=20, bw=(w-pad*2)/vals.length-9;
+  const days=['W1','W2','W3','W4','W5','W6','W7'];
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;display:block">
+    ${vals.map((v,i)=>{
+      const bh=(v/100)*(h-40), x=pad+i*((w-pad*2)/vals.length), y=h-24-bh;
+      const col=v>=85?'#177A5C':v>=70?'#D99A24':'#C0503C';
+      return `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="5" fill="${col}"/>
+        <text x="${x+bw/2}" y="${y-6}" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif"
+          font-size="10" font-weight="700" fill="#5C6F67">${v}</text>
+        <text x="${x+bw/2}" y="${h-7}" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif"
+          font-size="9.5" font-weight="600" fill="#8A9A93">${days[i]}</text>`;
+    }).join('')}</svg>`;
+}
+
+
+/* =========================================================
+   ADDED 28 Aug 2026 — pie chart for a single food item
+   Four wedges: protein, carbohydrate (less fibre), fat, fibre.
+   The centre carries the calories, so all five figures the
+   doctor asked for are on one picture.
+   ========================================================= */
+function macroSplit(f){
+  const carbNet = Math.max(0, (f.cb||0) - (f.fb||0));
+  return [
+    {k:'Protein',      g:f.p||0,  kc:(f.p||0)*4,  col:'#177A5C'},
+    {k:'Carbs',        g:carbNet, kc:carbNet*4,   col:'#D99A24'},
+    {k:'Fat',          g:f.f||0,  kc:(f.f||0)*9,  col:'#C0503C'},
+    {k:'Fibre',        g:f.fb||0, kc:(f.fb||0)*2, col:'#6B5CA5'}
+  ];
+}
+function pie(f, size){
+  const S=size||150, R=S/2-2, cx=S/2, cy=S/2;
+  const parts=macroSplit(f), tot=parts.reduce((s,x)=>s+x.kc,0)||1;
+  let a0=-Math.PI/2;
+  const wedges=parts.map(x=>{
+    if(x.kc<=0) return '';
+    const a1=a0 + (x.kc/tot)*2*Math.PI;
+    const big=(a1-a0)>Math.PI?1:0;
+    const p0=[cx+R*Math.cos(a0), cy+R*Math.sin(a0)];
+    const p1=[cx+R*Math.cos(a1), cy+R*Math.sin(a1)];
+    const d=`M ${cx} ${cy} L ${p0[0].toFixed(2)} ${p0[1].toFixed(2)} A ${R} ${R} 0 ${big} 1 ${p1[0].toFixed(2)} ${p1[1].toFixed(2)} Z`;
+    a0=a1;
+    return `<path d="${d}" fill="${x.col}" stroke="#fff" stroke-width="1.6"/>`;
+  }).join('');
+  return `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" style="display:block">
+    ${wedges}
+    <circle cx="${cx}" cy="${cy}" r="${R*0.44}" fill="#fff"/>
+    <text x="${cx}" y="${cy-1}" text-anchor="middle" font-family="Fraunces,serif"
+      font-size="${S*0.155}" font-weight="600" fill="#12211C">${f.c}</text>
+    <text x="${cx}" y="${cy+S*0.10}" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif"
+      font-size="${S*0.062}" font-weight="700" fill="#8A9A93" letter-spacing="1">KCAL</text></svg>`;
+}
+function pieMini(f){ return pie(f, 46); }
+
+function pieLegend(f){
+  const parts=macroSplit(f), tot=parts.reduce((s,x)=>s+x.kc,0)||1;
+  return parts.map(x=>`<div class="row" style="justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line)">
+      <div class="row" style="gap:8px"><i style="width:10px;height:10px;border-radius:3px;background:${x.col};display:block"></i>
+        <span style="font-size:12.5px;color:var(--muted);font-weight:600">${x.k}</span></div>
+      <div style="text-align:right"><b style="font-size:13px">${Math.round(x.g*10)/10} g</b>
+        <span style="font-size:11.5px;color:var(--faint)"> &middot; ${Math.round(x.kc)} kcal &middot; ${Math.round(x.kc/tot*100)}%</span></div>
+    </div>`).join('');
+}
+
+function openFood(id){
+  const f=food(id); if(!f) return;
+  $('modalHost').innerHTML=`<div class="modal-bg" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-h"><h3>${esc(f.n)}</h3>
+        <div class="sub" style="font-size:12.5px;color:var(--muted)">${f.m} &middot; ${f.g}${f.v?'':' &middot; Non-veg'}</div></div>
+      <div class="modal-b">
+        <div class="eyebrow">Where the calories come from</div>
+        <div class="row" style="gap:22px;align-items:center;margin-top:14px;flex-wrap:wrap">
+          <div>${pie(f,164)}</div>
+          <div style="flex:1;min-width:200px">${pieLegend(f)}</div>
+        </div>
+        <div class="row" style="gap:6px;margin-top:14px;flex-wrap:wrap">
+          <span class="pill p-grn">Protein ${f.p} g</span><span class="pill p-tur">Carbs ${f.cb} g</span>
+          <span class="pill p-chi">Fat ${f.f} g</span><span class="pill p-jam">Fibre ${f.fb} g</span>
+          <span class="pill p-gry">${f.c} kcal</span></div>
+        <div style="margin-top:14px;padding:12px 14px;background:var(--green-tint);border-radius:var(--r-s);
+          font-size:12.5px;color:var(--ink2);line-height:1.6">
+          The same picture appears on the patient's phone beside every item of her plan,
+          so she can see what she is actually eating.</div>
+      </div>
+      <div class="modal-f">
+        <button class="btn btn-gho" onclick="closeModal()">Close</button>
+        <button class="btn btn-pri" onclick="closeModal();toast('You would edit ${esc(f.n)} here')">Edit this item</button>
+      </div>
+    </div></div>`;
+  applyLang();
+}
+
+/* =========================================================
+   ADDED 28 Aug 2026 — WhatsApp: payment status + next visit
+   One tap from this screen. The message is built by the system,
+   the doctor only presses send. No message charges.
+   ========================================================= */
+function waText(p){
+  const L=ledger(p);
+  if(LANG==='gu'){
+    return `નમસ્તે ${p.n},\n\nસ્લિમ ’ન સ્લેન્ડર — તમારો હિસાબ:\n`+
+      `• અત્યાર સુધી આપેલા ડાયટ પ્લાન: ${L.plans}\n`+
+      `• ચૂકવાયેલી રકમ: ${INR(L.paid)}\n`+
+      (L.dueNow>0 ? `• બાકી રકમ: ${INR(L.dueNow)} (${CYCLE} પ્લાનનું ચક્ર પૂરું)\n`
+                  : `• બાકી રકમ: કંઈ નહીં — હિસાબ ચૂકતે છે\n`)+
+      `\nતમારી આગળની મુલાકાત: ${nextVisit(p)}\n`+
+      `આ દિવસે વજન કરાવવા આવજો.\n\n— ડૉ. નીતિ ગઢવી`;
+  }
+  return `Namaste ${p.n},\n\nSlim 'n Slender — your account:\n`+
+    `• Diet plans given so far: ${L.plans}\n`+
+    `• Paid till date: ${INR(L.paid)}\n`+
+    (L.dueNow>0 ? `• Amount due: ${INR(L.dueNow)} (a cycle of ${CYCLE} plans is complete)\n`
+                : `• Amount due: nothing — your account is clear\n`)+
+    `\nYour next visit: ${nextVisit(p)}\n`+
+    `Please come for your weighing on this date.\n\n— Dr. Nitee Gadhvi`;
+}
+function openWA(id){
+  const p=pat(id); if(!p) return;
+  const L=ledger(p);
+  $('modalHost').innerHTML=`<div class="modal-bg" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-h"><h3>Send on WhatsApp</h3>
+        <div class="sub" style="font-size:12.5px;color:var(--muted)">
+          To ${esc(p.n)} &middot; ${p.ph}</div></div>
+      <div class="modal-b">
+        <div class="eyebrow">The message that will go</div>
+        <div style="margin-top:12px;background:#DCF8C6;border-radius:14px;padding:14px 16px;
+          font-size:13px;line-height:1.65;white-space:pre-wrap;color:#0B2E22;border:1px solid #BFE7A8">${esc(waText(p))}</div>
+        <div class="row" style="gap:6px;margin-top:14px;flex-wrap:wrap">
+          <span class="pill ${L.dueNow>0?'p-chi':'p-grn'}">${L.dueNow>0?'Payment due '+INR(L.dueNow):'All cleared'}</span>
+          <span class="pill p-inf">Next visit ${nextVisit(p)}</span></div>
+        <div style="margin-top:14px;padding:12px 14px;background:var(--turmeric-soft);border-radius:var(--r-s);
+          font-size:12.5px;color:#7A5209;line-height:1.6">
+          WhatsApp opens with this already typed. You only press send, so there is no
+          message charge and no monthly platform fee.</div>
+      </div>
+      <div class="modal-f">
+        <button class="btn btn-gho" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-pri" onclick="closeModal();toast('WhatsApp would open with this message ready')">Send on WhatsApp now</button>
+      </div>
+    </div></div>`;
+  applyLang();
+}
+
+/* record a payment against a completed cycle */
+function openPay(id){
+  const p=pat(id); if(!p) return; const L=ledger(p);
+  $('modalHost').innerHTML=`<div class="modal-bg" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-h"><h3>Record a payment</h3>
+        <div class="sub" style="font-size:12.5px;color:var(--muted)">${esc(p.n)} &middot; cycle of ${CYCLE} plans</div></div>
+      <div class="modal-b">
+        <div class="grid g2">
+          <div class="field"><label class="lbl">Amount received</label>
+            <input class="inp" value="${L.dueNow>0?L.dueNow:CYCLE*PLAN_FEE}"></div>
+          <div class="field"><label class="lbl">Paid by</label>
+            <select class="inp"><option>Cash</option><option>UPI</option><option>Card</option></select></div>
+        </div>
+        <div class="field"><label class="lbl">Against</label>
+          <select class="inp"><option>Diet plans ${(L.paidCy*CYCLE)+1} to ${(L.paidCy+1)*CYCLE}</option>
+            <option>Consultation charge</option><option>Part payment</option></select></div>
+        <div style="padding:12px 14px;background:var(--green-tint);border-radius:var(--r-s);
+          font-size:12.5px;color:var(--ink2);line-height:1.6">
+          ${INR(PLAN_FEE)} per diet plan &times; ${CYCLE} plans = <b>${INR(CYCLE*PLAN_FEE)}</b> per cycle.
+          Consultation charges are billed separately and are not part of this figure.</div>
+      </div>
+      <div class="modal-f">
+        <button class="btn btn-gho" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-pri" onclick="closeModal();toast('Receipt saved &mdash; her dues are now clear')">Save receipt</button>
+      </div>
+    </div></div>`;
+  applyLang();
+}
+
+/* small horizontal money bars, last six months */
+function moneyBars(w,h){
+  const mx=Math.max(...MONTH_COLLECTION.map(x=>x.v))||1, pad=22;
+  const bw=(w-pad*2)/MONTH_COLLECTION.length-12;
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;display:block">
+    ${MONTH_COLLECTION.map((x,i)=>{
+      const bh=(x.v/mx)*(h-46), xx=pad+i*((w-pad*2)/MONTH_COLLECTION.length), y=h-26-bh;
+      return `<rect x="${xx}" y="${y}" width="${bw}" height="${bh}" rx="5" fill="${i===MONTH_COLLECTION.length-1?'#7FC0A9':'#177A5C'}"/>
+        <text x="${xx+bw/2}" y="${y-7}" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif"
+          font-size="10" font-weight="700" fill="#5C6F67">${(x.v/1000)}k</text>
+        <text x="${xx+bw/2}" y="${h-8}" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif"
+          font-size="9.5" font-weight="600" fill="#8A9A93">${x.m}</text>`;
+    }).join('')}</svg>`;
+}
+
+
+/* =========================================================
+   FULL DIET CHART FROM HISTORY  (added 3 September 2026)
+   Every version of every plan can be opened in full, printed
+   or saved as a PDF, sent on WhatsApp, or reused as the
+   starting point for a new plan.
+   ========================================================= */
+function dietChartHTML(p, h, seq, total){
+  const t = planTotals(h.plan);
+  const rows = SLOTS.map(sl=>{
+    const items = h.plan[sl.id]||[];
+    return `<tr>
+      <td class="slotc">${sl.name}</td>
+      <td class="timec">${sl.time}</td>
+      <td>${ items.length
+            ? items.map(([fid,q])=>{const f=food(fid);
+                return esc(f.n)+' &mdash; '+(q>1?q+' \u00D7 ':'')+esc(f.m);}).join('<br>')
+            : '\u2014' }</td>
+      <td class="r">${slotTotal(items)}</td></tr>`;
+  }).join('');
+  return `<div class="chart">
+    <div class="chart-head">
+      <div class="cm">S</div>
+      <div>
+        <h1>Slim 'n Slender</h1>
+        <div class="sub">Dr. Nitee Gadhvi &middot; Consulting dietician &middot; Junagadh</div>
+      </div>
+      <div class="rt"><b>Diet chart</b>${h.date}<br>Plan ${seq} / ${total}</div>
+    </div>
+
+    <div class="cmeta">
+      <div>Patient<b>${esc(p.n)}</b></div>
+      <div>Age<b>${p.age} yrs</b></div>
+      <div>Food preference<b>${esc(p.pref)}</b></div>
+      <div>Weight that day<b>${h.wt} kg</b></div>
+      <div>Target<b>${p.target} kg</b></div>
+      <div>Charged<b>${INR(h.fee)}</b></div>
+    </div>
+
+    <table class="ctab">
+      <thead><tr><th>Meal</th><th>Time</th><th>What to eat</th><th class="r">kcal</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr><td colspan="3">Total for the day</td><td class="r">${Math.round(t.c)} kcal</td></tr></tfoot>
+    </table>
+
+    <div class="cmacros">
+      <span class="pill p-grn">Protein ${t.p} g</span>
+      <span class="pill p-tur">Carbohydrate ${t.cb} g</span>
+      <span class="pill p-chi">Fat ${t.f} g</span>
+      <span class="pill p-jam">Fibre ${t.fb} g</span>
+      <span class="pill p-gry">${h.kind}</span>
+    </div>
+
+    <div class="cnote"><b>Note from your dietician:</b> ${esc(h.note)}. ${esc(p.note)}</div>
+
+    <div class="cfoot">
+      <span>Issued ${h.date} &middot; kept permanently in the patient's plan history</span>
+      <span>Slim 'n Slender, Junagadh</span>
+    </div>
+  </div>`;
+}
+
+/* open one full plan on screen */
+function viewPlan(i, who){
+  const p = pat(who==='pat' ? PAT_ID : CUR), H = planHistory(p);
+  const idx = Math.min(i, H.length-1), h = H[idx];
+  const seq = h.no, total = H.length;
+  $('modalHost').innerHTML = `<div class="modal-bg" onclick="closeModal(event)">
+    <div class="modal wide" onclick="event.stopPropagation()">
+      <div class="modal-h"><h3>Diet chart</h3>
+        <p><span class="l1">The complete plan exactly as it was given</span> &middot;
+          ${h.date} &middot; <span class="l1">Plan</span> ${seq} / ${total}</p></div>
+      <div class="modal-b">${dietChartHTML(p,h,seq,total)}</div>
+      <div class="modal-f" style="flex-wrap:wrap">
+        <button class="btn btn-gho" onclick="closeModal()">Close</button>
+        <button class="btn btn-gho" onclick="openWA(${p.id})">Send on WhatsApp</button>
+        ${who==='pat' ? '' :
+          `<button class="btn btn-gho" onclick="reusePlan(${idx})">Start a new plan from this</button>`}
+        <button class="btn btn-pri" onclick="printPlan(${idx},'${who==='pat'?'pat':'doc'}')">Download PDF</button>
+      </div>
+    </div></div>`;
+  applyLang();
+}
+
+/* one plan to the printer / PDF */
+function printPlan(i, who){
+  const p = pat(who==='pat' ? PAT_ID : CUR), H = planHistory(p);
+  const idx = Math.min(i, H.length-1), h = H[idx];
+  $('printArea').innerHTML = dietChartHTML(p, h, h.no, H.length);
+  translateTree($('printArea'));
+  setTimeout(()=>window.print(), 60);
+}
+
+/* the whole history as one PDF, one plan per page */
+function printAllPlans(){
+  const p = pat(CUR), H = planHistory(p);
+  $('printArea').innerHTML = H.map((h,i)=>
+    `<div class="${i<H.length-1?'pgbreak':''}">${dietChartHTML(p,h,h.no,H.length)}</div>`).join('');
+  translateTree($('printArea'));
+  setTimeout(()=>window.print(), 80);
+  toast(H.length + ' diet charts prepared, one per page');
+}
+
+/* reuse an old version as the starting point for a new plan */
+function reusePlan(i){
+  const p = pat(CUR), H = planHistory(p), h = H[Math.min(i,H.length-1)];
+  PLAN_DRAFT = JSON.parse(JSON.stringify(h.plan));
+  PLAN_DRAFT._id = p.id;
+  closeModal();
+  go('builder', p.id);
+  toast('Loaded the plan of ' + h.date + ' \u2014 change what you need and issue it');
+}
+
+/* ================= navigation ================= */
+const NAV = [
+  {g:1, id:'today',    t:'Today',           i:'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z'},
+  {g:1, id:'patients', t:'Patients',        i:'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 100 8 4 4 0 000-8z'},
+  {g:1, id:'builder',  t:'Diet plan',       i:'M9 11H3v10h6zM15 3H9v18h6zM21 7h-6v14h6z'},
+  {g:2, id:'foods',    t:'Food list',       i:'M3 2v7a3 3 0 006 0V2M6 9v13M18 2c-2 0-3 2-3 5s1 5 3 5 3-2 3-5-1-5-3-5zM18 12v10'},
+  {g:2, id:'recipes',  t:'Recipes',         i:'M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z'},
+  {g:2, id:'exercise', t:'Exercises',       i:'M23 7l-7 5 7 5zM14 5H3a2 2 0 00-2 2v10a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2z'},
+  {g:3, id:'planhistory', t:'Plan history', i:'M3 3v5h5M3.05 13A9 9 0 106 5.3L3 8M12 7v5l4 2'},
+  {g:3, id:'payments', t:'Payments',        i:'M1 4h22v16H1zM1 10h22M6 15h4'},
+  {g:4, id:'safety',   t:'Backup & safety', i:'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z', badge:'3'}
+];
+
+function icon(d){ return `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+  stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`; }
+
+function paintNav(){
+  [1,2,3,4].forEach(g=>{
+    $('nav'+g).innerHTML = NAV.filter(n=>n.g===g).map(n=>
+      `<button class="${VIEW===n.id||(n.id==='patients'&&VIEW==='patient')?'on':''}" onclick="go('${n.id}')">
+        ${icon(n.i)}<span>${n.t}</span>${n.badge?`<span class="badge">${n.badge}</span>`:''}</button>`).join('');
+  });
+}
+
+const MNAV=[
+  ['today','Today','M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z'],
+  ['patients','Patients','M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 100 8 4 4 0 000-8z'],
+  ['builder','Diet plan','M9 11H3v10h6zM15 3H9v18h6zM21 7h-6v14h6z'],
+  ['payments','Payments','M1 4h22v16H1zM1 10h22M6 15h4'],
+  ['__more','More','M4 6h16M4 12h16M4 18h16']
+];
+function paintMNav(){
+  const el=$('mnav'); if(!el) return;
+  const secondary=['foods','recipes','exercise','safety','index','payments','planhistory'];
+  el.innerHTML = MNAV.map(([id,t,d])=>{
+    const on = id==='__more' ? secondary.includes(VIEW)
+             : (VIEW===id || (id==='patients'&&VIEW==='patient') || (id==='builder'&&VIEW==='builder'));
+    return `<button class="${on?'on':''}" onclick="${id==='__more'?'openMore()':`go('${id}')`}">
+      ${icon(d)}<span>${t}</span></button>`;
+  }).join('');
+}
+function openMore(){
+  const M=[
+    ['foods','Food list','M3 2v7a3 3 0 006 0V2M6 9v13M18 2c-2 0-3 2-3 5s1 5 3 5 3-2 3-5-1-5-3-5zM18 12v10'],
+    ['recipes','Recipes','M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z'],
+    ['exercise','Exercises','M23 7l-7 5 7 5zM14 5H3a2 2 0 00-2 2v10a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2z'],
+    ['planhistory','Plan history','M3 3v5h5M3.05 13A9 9 0 106 5.3L3 8M12 7v5l4 2'],
+    ['payments','Payments','M1 4h22v16H1zM1 10h22M6 15h4'],
+    ['safety','Backup & safety','M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'],
+    ['newpatient','Register a patient','M12 5v14M5 12h14'],
+    ['index','All screens','M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z']
+  ];
+  $('modalHost').innerHTML=`<div class="sheet-bg" onclick="closeModal()"></div>
+  <div class="sheet"><div class="sheet-grip"></div>
+    ${M.map(([id,t,d])=>`<button onclick="closeModal();go('${id}')">${icon(d)}<span>${t}</span></button>`).join('')}
+    <hr>
+    <button onclick="closeModal();resetDemo()">${icon('M1 4v6h6M23 20v-6h-6M20.5 9A9 9 0 006 5.3L1 10M3.5 15A9 9 0 0018 18.7l5-4.7')}<span>Reset the demo</span></button>
+  </div>`;
+  applyLang();
+}
+
+function setMode(m){
+  MODE=m;
+  $('mode-doc').classList.toggle('on', m==='doc');
+  $('mode-pat').classList.toggle('on', m==='pat');
+  $('docApp').style.display = (m==='doc' && window._in) ? '' : 'none';
+  $('docLogin').style.display = (m==='doc' && !window._in) ? '' : 'none';
+  $('patApp').style.display = m==='pat' ? '' : 'none';
+  if(m==='pat') renderPat();
+  paintMNav();
+  const mn=$('mnav'); if(mn) mn.style.display = (m==='doc' && window._in && MOB()) ? 'flex' : '';
+  applyLang();
+}
+function doctorIn(){ window._in=true; setMode('doc'); go('today'); toast('Signed in as Dr. Nitee Gadhvi'); }
+function resetDemo(){ location.reload(); }
+
+function go(v, arg){
+  if(!window._in){ window._in=true; }
+  MODE='doc'; setMode('doc');
+  VIEW=v; if(v==='patient') CUR=arg||CUR; if(v==='builder'&&arg) CUR=arg;
+  if(v==='planhistory'&&arg){ CUR=arg; HIST_A=4; HIST_B=0; }
+  paintNav(); paintMNav(); window.scrollTo(0,0);
+  const R=SCREENS[v]; if(!R) return;
+  const o=R();
+  $('pgTitle').textContent=o.title;
+  $('pgSub').textContent=o.sub||'';
+  $('pgActions').innerHTML=o.actions||'';
+  $('docContent').innerHTML=o.body;
+  if(o.after) o.after();
+  applyLang();
+}
+function setHist(i, which){
+  if(which==='a') HIST_A=i; else HIST_B=i;
+  go('planhistory');
+}
+
+/* =========================================================
+   ADDED AFTER THE CLIENT MEETING — 28 August 2026
+   1. Diet plan history, every visit, never overwritten
+   2. Payment & dues panel (Rs 600 per plan, cleared every 4th)
+   5. WhatsApp message for payment status + next follow-up
+   ========================================================= */
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const TODAY = new Date(2026,8,3);
+function d2s(d){ return String(d.getDate()).padStart(2,'0')+' '+MONTHS[d.getMonth()]+' '+d.getFullYear(); }
+function s2d(s){ const a=s.split(' '); return new Date(+a[2], MONTHS.indexOf(a[1]), +a[0]); }
+function addDays(d,n){ const x=new Date(d.getTime()); x.setDate(x.getDate()+n); return x; }
+const INR = n => '\u20B9' + Number(n).toLocaleString('en-IN');
+
+const PLAN_FEE = 600;          // per diet plan, as the doctor charges
+const CYCLE    = 4;            // dues settled after every 4 plans
+const CONSULT  = 500;          // first-visit consultation, billed separately
+
+/* ---------- how many plans each patient has been given ---------- */
+function visitCount(p){ return p.wts.length; }
+const LAST_VISIT = new Date(2026,7,29);            // Saturday 29 August 2026
+function visitSpan(p){
+  const n=visitCount(p); if(n<2) return 7*864e5;
+  return (LAST_VISIT.getTime() - s2d(p.since).getTime()) / (n-1);
+}
+function visitDate(p,i){ return new Date(s2d(p.since).getTime() + i*visitSpan(p)); }
+
+/* ---------- older versions of a plan, derived from the current one ---------- */
+function planAtRev(p, back){
+  const plan = JSON.parse(JSON.stringify(PLANS[p.id]));
+  delete plan._id;
+  if(back>=1 && plan.ev && plan.ev.length) plan.ev[plan.ev.length-1] = [6,1];
+  if(back>=2 && plan.ln && plan.ln.length) plan.ln[0] = [plan.ln[0][0], plan.ln[0][1]+1];
+  if(back>=3) plan.mm = [[32,1]];
+  if(back>=4) plan.dn = [[2,1],[13,1]];
+  if(back>=5){ plan.bd = [[20,1]]; plan.bf = (plan.bf||[]).concat([[27,1]]); }
+  return plan;
+}
+const REV_NOTE = [
+  'Evening slot changed after hunger complaints',
+  'Lunch rotli reduced by one',
+  'Mid-morning fruit changed to a sprouts bowl',
+  'Dinner made lighter after the blood report',
+  'First plan given at enrolment'
+];
+
+/* every visit is stored — newest first */
+function planHistory(p){
+  const n = visitCount(p), out = [];
+  let rev = 0;
+  for(let i=n-1;i>=0;i--){
+    const isNew = (i % CYCLE === 0) || i===n-1;
+    if(isNew && out.length) rev++;
+    const plan = planAtRev(p, Math.min(rev,5));
+    out.push({
+      no: i+1,
+      date: d2s(visitDate(p,i)),
+      wt: p.wts[i] ? p.wts[i].w : p.start,
+      kcal: Math.round(planTotals(plan).c),
+      plan,
+      kind: isNew ? 'Revised plan' : 'Continued, no change',
+      note: isNew ? (REV_NOTE[Math.min(rev,4)] || 'Plan revised at this visit')
+                  : 'Same plan continued; weight recorded',
+      fee: PLAN_FEE
+    });
+  }
+  out[0].kind = 'Running now';
+  out[0].note = 'The plan she is following today';
+  out[out.length-1].kind = 'First plan';
+  out[out.length-1].note = 'First plan given at enrolment';
+  return out;
+}
+
+/* ---------- what changed between two versions ---------- */
+function planDiff(a,b){                       // a = older, b = newer
+  const rows=[];
+  SLOTS.forEach(s=>{
+    const A=(a[s.id]||[]), B=(b[s.id]||[]);
+    const key=x=>x[0];
+    const inA=new Map(A.map(x=>[key(x),x[1]])), inB=new Map(B.map(x=>[key(x),x[1]]));
+    inB.forEach((q,fid)=>{
+      if(!inA.has(fid)) rows.push({slot:s.name, k:'add', txt:food(fid).n+' \u00D7 '+q});
+      else if(inA.get(fid)!==q) rows.push({slot:s.name, k:'chg', txt:food(fid).n+': '+inA.get(fid)+' \u2192 '+q});
+    });
+    inA.forEach((q,fid)=>{ if(!inB.has(fid)) rows.push({slot:s.name, k:'rm', txt:food(fid).n+' \u00D7 '+q}); });
+  });
+  return rows;
+}
+
+/* ---------- payment ledger ---------- */
+const PAID_CYCLES = {1:6, 2:4, 3:7, 4:4, 5:3, 6:2, 7:1, 8:8};
+const PAY_MODE    = {1:'UPI', 2:'Cash', 3:'UPI', 4:'Cash', 5:'UPI', 6:'Cash', 7:'Cash', 8:'UPI'};
+
+function ledger(p){
+  const plans   = visitCount(p);
+  const cycles  = Math.floor(plans / CYCLE);
+  const paidCy  = Math.min(PAID_CYCLES[p.id] ?? cycles, cycles);
+  const inCycle = plans % CYCLE;
+  const billed  = plans * PLAN_FEE;
+  const paid    = paidCy * CYCLE * PLAN_FEE;
+  const dueNow  = (cycles - paidCy) * CYCLE * PLAN_FEE;
+  const running = inCycle * PLAN_FEE;
+  const lastPay = paidCy ? d2s(visitDate(p, paidCy*CYCLE - 1)) : '\u2014';
+  const nextDue = d2s(visitDate(p, (cycles + (inCycle?1:0)) * CYCLE - 1));
+  return {plans, cycles, paidCy, inCycle, billed, paid, dueNow, running, lastPay, nextDue,
+          consult: CONSULT, mode: PAY_MODE[p.id] || 'Cash',
+          status: dueNow>0 ? 'Payment due' : (inCycle===0 ? 'All cleared' : 'Cycle running')};
+}
+function nextVisit(p){ return d2s(new Date(LAST_VISIT.getTime() + visitSpan(p))); }
+
+/* recent receipts, newest first */
+function receipts(){
+  const out=[];
+  PATIENTS.forEach(p=>{
+    const L=ledger(p);
+    for(let c=L.paidCy;c>0 && out.length<400;c--){
+      out.push({p, date:d2s(visitDate(p, c*CYCLE-1)), cyc:c,
+                amt:CYCLE*PLAN_FEE, mode:L.mode, plans:CYCLE});
+    }
+  });
+  return out.sort((a,b)=>s2d(b.date)-s2d(a.date));
+}
+const MONTH_COLLECTION = [
+  {m:'Apr', v:9600}, {m:'May', v:12000}, {m:'Jun', v:14400},
+  {m:'Jul', v:16800}, {m:'Aug', v:19200}, {m:'Sep', v:4800}
+];
+
+/* =========================================================
+   GUJARATI LANGUAGE LAYER  (added after the meeting of 28 Aug 2026)
+   The whole application switches language from one control.
+   Exact phrases are translated first; anything left over falls
+   back to a phrase-by-phrase substitution, so no screen is
+   left half-English.
+   ========================================================= */
+let LANG = 'en';
+
+const GU = {
+/* --- chrome / navigation --- */
+'Doctor':'ડૉક્ટર','Patient':'દર્દી','All screens':'બધી સ્ક્રીન','Reset demo':'ડેમો ફરી શરૂ કરો',
+'Daily work':'રોજનું કામ','Your libraries':'તમારી યાદીઓ','Money':'હિસાબ','Safety':'સલામતી',
+'Today':'આજે','Patients':'દર્દીઓ','Diet plan':'ડાયટ પ્લાન','Food list':'ખોરાકની યાદી',
+'Recipes':'વાનગીઓ','Exercises':'કસરત','Exercise':'કસરત','Payments':'પેમેન્ટ','More':'વધુ',
+'Backup & safety':'બેકઅપ અને સલામતી','Plan history':'પ્લાનનો ઈતિહાસ',
+'Consulting dietician':'સલાહકાર ડાયટિશિયન','Reception':'રિસેપ્શન','Register a patient':'નવી દર્દી નોંધો',
+'Reset the demo':'ડેમો ફરી શરૂ કરો','Progress':'પ્રગતિ','My plans':'મારા પ્લાન','My payments':'મારું પેમેન્ટ',
+
+/* --- login --- */
+'Sign in':'સાઇન ઇન','Welcome back, Doctor.':'ફરી સ્વાગત છે, ડૉક્ટર.',
+'Mobile number':'મોબાઈલ નંબર','Password':'પાસવર્ડ','Sign in to my clinic':'મારા ક્લિનિકમાં સાઇન ઇન કરો',
+'Every patient file, every diet chart, every kilo — in one place.':'દરેક દર્દીની ફાઇલ, દરેક ડાયટ ચાર્ટ, દરેક કિલો — એક જ જગ્યાએ.',
+'6-digit PIN':'6 આંકડાનો પિન','Open my plan':'મારો પ્લાન ખોલો',
+
+/* --- slots --- */
+'Early morning':'વહેલી સવાર','Breakfast':'સવારનો નાસ્તો','Mid-morning':'બપોર પહેલાં',
+'Lunch':'બપોરનું ભોજન','Evening':'સાંજ','Dinner':'રાત્રિભોજન','Bedtime':'સૂતાં પહેલાં',
+
+/* --- stat labels --- */
+'Weight now':'અત્યારનું વજન','Lost so far':'અત્યાર સુધી ઘટ્યું','BMI today':'આજનો BMI',
+'Towards goal':'લક્ષ્ય તરફ','Active patients':'ચાલુ દર્દીઓ','Plans running':'ચાલુ પ્લાન',
+'Due for follow-up':'ફોલો-અપ બાકી','Total weight lost':'કુલ ઘટેલું વજન',
+'Collected this month':'આ મહિને મળેલા','Outstanding dues':'બાકી રકમ',
+'Plans issued this month':'આ મહિને આપેલા પ્લાન','Patients due to pay':'પેમેન્ટ બાકી હોય તેવી દર્દી',
+
+/* --- headings / hints --- */
+'Her journey':'તેની સફર','Plan running now':'અત્યારે ચાલુ પ્લાન','Weight, week by week':'અઠવાડિયે અઠવાડિયે વજન',
+'Following the plan':'પ્લાન કેટલો પાળ્યો','Nothing is ever overwritten':'કશું ક્યારેય ભૂંસાતું નથી',
+'Nothing is ever deleted':'કશું ક્યારેય ડિલીટ થતું નથી','Every reading since her first visit':'પહેલી મુલાકાતથી દરેક નોંધ',
+'Last 7 weeks':'છેલ્લા 7 અઠવાડિયાં','Good week':'સારું અઠવાડિયું','Slipped a little':'થોડું ચૂક્યું',
+'Needs a talk':'વાત કરવી પડશે','Your note:':'તમારી નોંધ:','Consent':'સંમતિ',
+'What happens next':'હવે શું થશે','Who she is':'એ કોણ છે','Where she is starting from':'શરૂઆત ક્યાંથી',
+
+/* --- buttons --- */
+'Edit her plan':'તેનો પ્લાન બદલો','Open the plan builder':'પ્લાન બિલ્ડર ખોલો','Issue this plan':'આ પ્લાન આપો',
+'Save as template':'ટેમ્પ્લેટ તરીકે સાચવો','Download diet chart':'ડાયટ ચાર્ટ ડાઉનલોડ કરો',
+'Send on WhatsApp':'વૉટ્સએપ પર મોકલો','Download as Excel':'એક્સેલમાં ડાઉનલોડ કરો',
+'+ Add food':'+ ખોરાક ઉમેરો','+ Add recipe':'+ વાનગી ઉમેરો','Cancel':'રદ કરો','Close':'બંધ કરો',
+'Save and open her file':'સાચવો અને ફાઇલ ખોલો','Record a payment':'પેમેન્ટ નોંધો','Record payment':'પેમેન્ટ નોંધો',
+'Compare':'સરખાવો','View this plan':'આ પ્લાન જુઓ','Restore':'પાછું લાવો','She has agreed':'તેણે સંમતિ આપી છે',
+'Send payment status':'પેમેન્ટની સ્થિતિ મોકલો','Send on WhatsApp now':'હમણાં વૉટ્સએપ પર મોકલો',
+
+/* --- food groups & measures --- */
+'Cereals':'અનાજ','Pulses':'કઠોળ','Veg':'શાકભાજી','Dairy':'દૂધ-દહીં','Protein':'પ્રોટીન',
+'Drinks':'પીણાં','Nuts':'સૂકો મેવો','Snacks':'નાસ્તો','Fruit':'ફળ','Non-veg':'માંસાહારી',
+'Vegetarian':'શાકાહારી','Non-vegetarian':'માંસાહારી','Jain':'જૈન','Eggetarian':'ઈંડાં સાથે',
+
+/* --- foods --- */
+'Boiled moong':'બાફેલા મગ','Moong dal khichdi':'મગની દાળની ખીચડી','Bajra rotla':'બાજરીનો રોટલો',
+'Jowar rotli':'જુવારની રોટલી','Methi thepla':'મેથીના થેપલા','Plain khakhra':'સાદા ખાખરા',
+'Vegetable poha':'શાકભાજીવાળા પૌંઆ','Rava upma':'રવાનો ઉપમા','Steamed dhokla':'વરાળે બનાવેલા ઢોકળા',
+'Toor dal':'તુવેરની દાળ','Chana chaat':'ચણા ચાટ','Sprouted matki':'ફણગાવેલી મઠ',
+'Lauki sabzi':'દૂધીનું શાક','Tindora sabzi':'ટીંડોળાનું શાક','Palak sabzi':'પાલકનું શાક',
+'Mixed veg salad':'મિક્સ સલાડ','Cucumber sticks':'કાકડીના ટુકડા','Low-fat curd':'ઓછી ચરબીવાળું દહીં',
+'Chaas (no salt)':'છાશ (મીઠા વગર)','Toned milk':'ટોન્ડ દૂધ','Paneer bhurji':'પનીર ભુર્જી',
+'Boiled egg white':'બાફેલા ઈંડાની સફેદી','Grilled chicken':'ગ્રિલ્ડ ચિકન','Warm water + lemon':'હૂંફાળું પાણી + લીંબુ',
+'Methi seed water':'મેથીનું પાણી','Green tea':'ગ્રીન ટી','Soaked almonds':'પલાળેલી બદામ',
+'Walnut halves':'અખરોટ','Roasted chana':'શેકેલા ચણા','Papaya cubes':'પપૈયાના ટુકડા',
+'Guava':'જામફળ','Apple':'સફરજન','Orange':'સંતરા','Oats porridge':'ઓટ્સનો પોરીજ',
+
+/* --- pie / nutrition --- */
+'Where the calories come from':'કેલરી ક્યાંથી આવે છે','Per stated measure':'આપેલા માપ પ્રમાણે',
+'Nutrition in this item':'આ ખોરાકમાં પોષણ','Carbohydrate':'કાર્બોહાઇડ્રેટ','Carbs':'કાર્બ્સ',
+'Fat':'ચરબી','Fibre':'ફાઇબર','Calories':'કેલરી','Energy':'ઊર્જા','Measure':'માપ','Group':'જૂથ','Food':'ખોરાક'
+};
+
+/* fallback phrases — applied when a whole line has no exact match */
+let GU_PH_RAW = [
+['Dr. Nitee Gadhvi','ડૉ. નીતિ ગઢવી'],["Slim 'n Slender","સ્લિમ ’ન સ્લેન્ડર"],['Junagadh','જૂનાગઢ'],
+['diet plan','ડાયટ પ્લાન'],['Diet plan','ડાયટ પ્લાન'],['diet chart','ડાયટ ચાર્ટ'],
+['follow-up','ફોલો-અપ'],['Follow-up','ફોલો-અપ'],['WhatsApp','વૉટ્સએપ'],
+['kcal','કેલરી'],['KCAL','કેલરી'],['kg','કિગ્રા'],['cm','સેમી'],['yrs','વર્ષ'],['years','વર્ષ'],
+['Protein','પ્રોટીન'],['protein','પ્રોટીન'],['Carbs','કાર્બ્સ'],['carbs','કાર્બ્સ'],
+['Carbohydrate','કાર્બોહાઇડ્રેટ'],['Fibre','ફાઇબર'],['fibre','ફાઇબર'],['Fat','ચરબી'],['fat','ચરબી'],
+['Calories','કેલરી'],['calories','કેલરી'],['Measure','માપ'],['Group','જૂથ'],
+['TARGET','લક્ષ્ય'],['Target','લક્ષ્ય'],['target','લક્ષ્ય'],['Started at','શરૂઆત'],
+['Weight','વજન'],['weight','વજન'],['Height','ઊંચાઈ'],['Age','ઉંમર'],['Full name','પૂરું નામ'],
+['Mobile number','મોબાઈલ નંબર'],['Food preference','ખોરાકની પસંદ'],
+['per week on average','સરેરાશ પ્રતિ અઠવાડિયું'],['on average','સરેરાશ'],['per week','પ્રતિ અઠવાડિયે'],
+['to go','બાકી'],['of her goal','લક્ષ્યનું'],['of your goal','તમારા લક્ષ્યનું'],
+['Maintenance','જાળવણી'],['Active','ચાલુ'],['since','થી'],['Since','થી'],
+['Running now','અત્યારે ચાલુ'],['Issued','આપ્યો'],['issued','આપ્યો'],['Paid','ચૂકવાયું'],['Due','બાકી'],
+['Pending','બાકી'],['Cleared','ચૂકતે'],['Consultation','કન્સલ્ટેશન'],['Payment','પેમેન્ટ'],
+['payment','પેમેન્ટ'],['Visit','મુલાકાત'],['visit','મુલાકાત'],['Search','શોધો'],['Edit','બદલો'],
+['Veg','શાકાહારી'],['Non-veg','માંસાહારી'],['Jain','જૈન'],['Today','આજે'],['Yesterday','ગઈકાલે'],
+['katori','વાટકી'],['glass','ગ્લાસ'],['plate','થાળી'],['medium','મધ્યમ'],['pieces','નંગ'],
+['piece','નંગ'],['cup','કપ'],['mutthi','મુઠ્ઠી'],
+['Jan','જાન્યુ'],['Feb','ફેબ્રુ'],['Mar','માર્ચ'],['Apr','એપ્રિલ'],['May','મે'],['Jun','જૂન'],
+['Jul','જુલાઈ'],['Aug','ઓગસ્ટ'],['Sep','સપ્ટે'],['Oct','ઓક્ટો'],['Nov','નવે'],['Dec','ડિસે'],
+['May','મે'],['AVERAGE','સરેરાશ'],['Diet plans','ડાયટ પ્લાન'],['to','થી'],
+['meal slots','ભોજન સ્લોટ'],['meals','ભોજન'],['Meals taken','લીધેલાં ભોજન'],['MEALS TAKEN','લીધેલાં ભોજન'],
+['a day','રોજ'],['of','માંથી'],['and','અને']
+];
+let GU_PH = GU_PH_RAW.slice().sort((a,b)=>b[0].length-a[0].length).map(([en,gu])=>{
+  const esc = en.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const L = /^\w/.test(en) ? '\\b' : '';
+  const R = /\w$/.test(en) ? '\\b' : '';
+  return [new RegExp(L+esc+R,'g'), gu];
+});
+
+/* second pass, after walking every screen — added 28 Aug 2026 */
+Object.assign(GU, {
+'Payments and dues':'પેમેન્ટ અને બાકી રકમ','Payments due':'બાકી પેમેન્ટ','Due now':'હમણાં બાકી',
+'Paid till date':'આજ સુધી ચૂકવાયું','Plans given':'આપેલા પ્લાન','Plans issued so far':'અત્યાર સુધી આપેલા પ્લાન',
+'Plans on record':'નોંધાયેલા પ્લાન','Revisions made':'કરેલા ફેરફાર','Calories then':'ત્યારની કેલરી',
+'Calories now':'અત્યારની કેલરી','This cycle':'આ સાયકલ','Last payment':'છેલ્લું પેમેન્ટ','Status':'સ્થિતિ',
+'Cycle running':'સાયકલ ચાલુ','Payment due':'પેમેન્ટ બાકી','All cleared':'બધું ચૂકતે','Record':'નોંધો',
+'WhatsApp':'વૉટ્સએપ','Patient by patient':'દર્દી પ્રમાણે','Recent receipts':'તાજી પહોંચ',
+'What you collected':'તમે કેટલું મેળવ્યું','Last six months':'છેલ્લા છ મહિના','Newest first':'નવું પહેલાં',
+'How this counts':'આ ગણતરી કઈ રીતે','Her account':'તેનો હિસાબ','Next follow-up':'આગળનું ફોલો-અપ',
+'Sent to her on WhatsApp':'તેને વૉટ્સએપ પર મોકલાય છે','See the message':'સંદેશો જુઓ',
+'Weighing and plan review':'વજન અને પ્લાનની સમીક્ષા','Open the payment panel':'પેમેન્ટ પેનલ ખોલો',
+'Download statement':'સ્ટેટમેન્ટ ડાઉનલોડ કરો','Not due yet — cycles still open':'હજી બાકી નથી — સાયકલ ચાલુ છે',
+'Every visit':'દરેક મુલાકાત','Compare two versions':'બે આવૃત્તિ સરખાવો','Older version':'જૂની આવૃત્તિ',
+'Newer version':'નવી આવૃત્તિ','Compare from here':'અહીંથી સરખાવો','Compare to here':'અહીં સુધી સરખાવો',
+'Added':'ઉમેર્યું','Removed':'કાઢ્યું','Changed':'બદલ્યું','Export all versions':'બધી આવૃત્તિ નિકાસ કરો',
+'Issue a new plan':'નવો પ્લાન આપો','Oldest on the left':'ડાબી બાજુ સૌથી જૂનું',
+'The rest were continued unchanged':'બાકીના એ જ પ્લાન પર ચાલુ રહ્યા','At her very first plan':'તેના પહેલા પ્લાન વખતે',
+'What you actually changed, and when':'તમે ખરેખર શું અને ક્યારે બદલ્યું',
+'Calories across every plan she has been given':'તેને અપાયેલા દરેક પ્લાનની કેલરી',
+'Same plan continued; weight recorded':'એ જ પ્લાન ચાલુ; વજન નોંધાયું',
+'The plan she is following today':'આજે તે જે પ્લાન પાળે છે','First plan given at enrolment':'નોંધણી વખતે અપાયેલો પહેલો પ્લાન',
+'Green dots are the plans given in the cycle running now':'લીલા ટપકાં એટલે અત્યારની સાયકલમાં અપાયેલા પ્લાન',
+'Split':'વિભાજન','Diet chart':'ડાયટ ચાર્ટ','Meal':'ભોજન','Time':'સમય','Total for the day':'આખા દિવસનો કુલ','What to eat':'શું ખાવું','Charged':'ચાર્જ','Weight that day':'તે દિવસનું વજન','View full plan':'આખો પ્લાન જુઓ','PDF':'PDF','Open in full':'આખું ખોલો','Download PDF':'PDF ડાઉનલોડ કરો','Download all plans as PDF':'બધા પ્લાન PDF માં ડાઉનલોડ કરો','Start a new plan from this':'આના પરથી નવો પ્લાન બનાવો','The complete plan exactly as it was given':'આખો પ્લાન, જેમ અપાયો હતો તેમ','See it as a printed chart':'છપાયેલા ચાર્ટ તરીકે જુઓ',"View today's chart":'આજનો ચાર્ટ જુઓ','View full plan':'આખો પ્લાન જુઓ','Open in full':'આખો ખોલો','PDF':'PDF','Download PDF':'PDF ડાઉનલોડ કરો','Download all plans as PDF':'બધા પ્લાન PDF માં ડાઉનલોડ કરો','Start a new plan from this':'આના પરથી નવો પ્લાન બનાવો','Diet chart':'ડાયટ ચાર્ટ','What to eat':'શું ખાવું','Meal':'ભોજન','Time':'સમય','Total for the day':'આખા દિવસનો સરવાળો','Weight that day':'તે દિવસનું વજન','Charged':'ચાર્જ','Patient':'દર્દી','Age':'ઉંમર','Food preference':'ખોરાકની પસંદ','Consulting dietician':'સલાહકાર ડાયટિશિયન','Download this chart as PDF':'આ ચાર્ટ PDF માં ડાઉનલોડ કરો','See it as a printed chart':'છાપેલા ચાર્ટ તરીકે જુઓ','View this plan':'આ પ્લાન જુઓ','Open all 26 plans':'બધા 26 પ્લાન ખોલો',"View today's chart":'આજનો ચાર્ટ જુઓ','Paid':'ચૂકવાયું','Money & history':'હિસાબ અને ઈતિહાસ','Patient':'દર્દી','Plan history':'પ્લાનનો ઈતિહાસ','AVERAGE':'સરેરાશ','Restore':'પાછું લાવો','Save receipt':'પહોંચ સાચવો','Part payment':'આંશિક પેમેન્ટ','Consultation charge':'કન્સલ્ટેશન ચાર્જ','Open chart':'ચાર્ટ ખોલો','Nutrition in this item':'આ ખોરાકનું પોષણ',
+'Edit this item':'આ વસ્તુ બદલો','Save receipt':'પહોંચ સાચવો','Amount received':'મળેલી રકમ',
+'Paid by':'કઈ રીતે ચૂકવાયું','Against':'કોના બદલામાં','Cash':'રોકડ','Card':'કાર્ડ',
+'The message that will go':'જે સંદેશો જશે','Every item now carries its own pie chart.':'હવે દરેક વસ્તુનો પોતાનો પાઈ ચાર્ટ છે.',
+'These values are yours, not ours.':'આ આંકડા તમારા છે, અમારા નહીં.',
+/* dashboard + existing screens */
+'Needs your attention':'તમારું ધ્યાન જોઈએ','Everything else is running on plan':'બાકી બધું પ્લાન પ્રમાણે ચાલે છે',
+'Best progress this month':'આ મહિનાની શ્રેષ્ઠ પ્રગતિ','Everyone on an active plan':'ચાલુ પ્લાન પરના બધા',
+'Tap a row to open the file':'ફાઇલ ખોલવા લાઇન પર ટૅપ કરો','Open her file':'તેની ફાઇલ ખોલો',
+'All patients':'બધા દર્દીઓ','+ New patient':'+ નવી દર્દી','+ Add food':'+ ખોરાક ઉમેરો',
+'+ Add recipe':'+ વાનગી ઉમેરો','+ Add exercise':'+ કસરત ઉમેરો','Patients on an active plan':'ચાલુ પ્લાન પરના દર્દીઓ',
+'Due for follow-up':'ફોલો-અપ બાકી','No weight this week':'આ અઠવાડિયે વજન નથી','Total weight lost':'કુલ ઘટેલું વજન',
+'One is on maintenance':'એક જાળવણી પર છે','Worth a reminder call':'યાદ કરાવવા ફોન કરવો',
+'Last seen over 3 weeks ago':'3 અઠવાડિયાંથી આવ્યાં નથી','Follow-up due':'ફોલો-અપ બાકી','Weight missing':'વજન નોંધાયું નથી',
+'On plan':'પ્લાન પર','Maintenance':'જાળવણી','Now':'અત્યારે','Lost':'ઘટ્યું','Target':'લક્ષ્ય','Started':'શરૂઆત',
+'Per week':'પ્રતિ અઠવાડિયે','Running':'ચાલુ','Verified':'ચકાસાયેલું','Add':'ઉમેરો','Start':'શરૂ કરો',
+'Search by name…':'નામથી શોધો…','Search food…':'ખોરાક શોધો…','Add from your food list…':'તમારી યાદીમાંથી ઉમેરો…',
+'Start from a template':'ટેમ્પ્લેટથી શરૂ કરો','The day adds up to':'આખા દિવસનો સરવાળો',
+'Your food list':'તમારી ખોરાકની યાદી','Your recipes':'તમારી વાનગીઓ','Your exercises':'તમારી કસરતો',
+'Your exercise':'તમારી કસરત','Assign to a patient':'દર્દીને સોંપો','Attach to a plan':'પ્લાન સાથે જોડો',
+'Change these':'આ બદલો','How to make it':'કઈ રીતે બનાવવું','What goes in':'શું શું નાખવું','Method':'રીત',
+'Written once, attached to any plan afterwards':'એક વાર લખો, પછી કોઈ પણ પ્લાનમાં જોડો',
+'Register a new patient':'નવી દર્દી નોંધો','This replaces the front page of the paper file':'આ કાગળની ફાઇલનું પહેલું પાનું બદલે છે',
+'Full name':'પૂરું નામ','Age':'ઉંમર','Height':'ઊંચાઈ','Weight today':'આજનું વજન','Target weight':'લક્ષ્ય વજન',
+'Food preference':'ખોરાકની પસંદ','Medical notes and allergies':'દવાની નોંધ અને એલર્જી',
+'Your own note about her':'તેના વિશે તમારી નોંધ','Exercises assigned':'સોંપેલી કસરત',
+/* safety */
+'Recycle bin':'રિસાયકલ બિન','Backup history':'બેકઅપનો ઈતિહાસ','Last backup':'છેલ્લું બેકઅપ',
+'Copies kept':'સાચવેલી નકલો','Back up now':'હમણાં બેકઅપ લો','Restore this':'આ પાછું લાવો',
+'Download everything':'બધું ડાઉનલોડ કરો','In the recycle bin':'રિસાયકલ બિનમાં','Restorable for 90 days':'90 દિવસ સુધી પાછું આવી શકે',
+'Automatic, every night':'દરરોજ રાત્રે આપોઆપ','Nightly automatic':'રાત્રિનું આપોઆપ','Monthly kept copy':'મહિનાની સાચવેલી નકલ',
+'Before version update':'નવી આવૃત્તિ પહેલાં','Kept 12 months':'12 મહિના સચવાય','Who changed what':'કોણે શું બદલ્યું',
+'Permanent, and editable by nobody':'કાયમી, કોઈ બદલી ન શકે','Kept away from the main system':'મુખ્ય સિસ્ટમથી અલગ રખાય',
+'Nothing in this system can be lost by accident':'આ સિસ્ટમમાં કશું ભૂલથી ખોવાય નહીં',
+'Only your login can erase anything permanently.':'ફક્ત તમારા લોગિનથી જ કાયમી ભૂંસી શકાય.',
+'Last 30 nights, last 12 months':'છેલ્લી 30 રાત, છેલ્લા 12 મહિના','System':'સિસ્ટમ',
+/* patient portal */
+'What your patient sees':'તમારી દર્દી શું જુએ છે','Your plan for today':'આજનો તમારો પ્લાન',
+'My plans':'મારા પ્લાન','Payments':'પેમેન્ટ','Your account':'તમારો હિસાબ','Receipts':'પહોંચ',
+'To be paid':'ચૂકવવાના','Nothing pending':'કંઈ બાકી નથી','Your next visit':'તમારી આગળની મુલાકાત',
+'Diet plans given':'અપાયેલા ડાયટ પ્લાન','Charge per plan':'એક પ્લાનનો ચાર્જ','This cycle so far':'આ સાયકલમાં અત્યાર સુધી',
+'What you were eating then':'ત્યારે તમે શું ખાતાં હતાં','What to eat':'શું ખાવું',
+'Assigned by Dr. Nitee':'ડૉ. નીતિએ સોંપેલી','Mark lunch as taken':'બપોરનું ભોજન લીધું એમ નોંધો',
+/* names */
+'Meera Trivedi':'મીરા ત્રિવેદી','Kinjal Dave':'કિંજલ દવે','Hetal Joshi':'હેતલ જોષી','Rekha Bhatt':'રેખા ભટ્ટ',
+'Priya Modi':'પ્રિયા મોદી','Falguni Shah':'ફાલ્ગુની શાહ','Bhavna Pandya':'ભાવના પંડ્યા','Nisha Vora':'નિશા વોરા',
+/* exercises + recipes */
+'Morning walk — brisk pace':'સવારે ઝડપી ચાલ','Surya namaskar — 6 rounds':'સૂર્યનમસ્કાર — 6 વાર',
+'Wall push-ups':'દીવાલ પુશ-અપ','Chair squats':'ખુરશી સ્ક્વોટ','Seated leg raises':'બેસીને પગ ઊંચા કરવા',
+'Deep breathing — pranayama':'ઊંડા શ્વાસ — પ્રાણાયામ','Whole body':'આખું શરીર','Upper body':'ઉપરનું શરીર',
+'Legs':'પગ','Legs, core':'પગ અને કમર','Breathing':'શ્વાસ',
+'Moong chilla':'મગનો ચીલા','Lauki muthiya':'દૂધીના મુઠિયા','Methi thepla (low oil)':'મેથીના થેપલા (ઓછું તેલ)',
+'Sprouts and pomegranate bowl':'ફણગાવેલા કઠોળ અને દાડમ','Oats and curd bowl':'ઓટ્સ અને દહીં',
+'Vegetable clear soup':'શાકભાજીનો સૂપ','High protein':'વધુ પ્રોટીન','Steamed':'વરાળે બનાવેલું',
+'Everyday':'રોજિંદું','No cooking':'રાંધવાનું નહીં','Night before':'આગલી રાત્રે','Evening':'સાંજ'
+});
+
+GU_PH_RAW = [
+/* proper nouns */
+['Dr. Nitee Gadhvi','ડૉ. નીતિ ગઢવી'],["Slim 'n Slender","સ્લિમ ’ન સ્લેન્ડર"],['Junagadh','જૂનાગઢ'],
+['Meera Trivedi','મીરા ત્રિવેદી'],['Kinjal Dave','કિંજલ દવે'],['Hetal Joshi','હેતલ જોષી'],
+['Rekha Bhatt','રેખા ભટ્ટ'],['Priya Modi','પ્રિયા મોદી'],['Falguni Shah','ફાલ્ગુની શાહ'],
+['Bhavna Pandya','ભાવના પંડ્યા'],['Nisha Vora','નિશા વોરા'],['Jyoti Raval','જ્યોતિ રાવલ'],
+/* long phrases first */
+['patients have finished a cycle','દર્દીની સાયકલ પૂરી થઈ'],['since you started','થી અત્યાર સુધીમાં'],
+['Every one of them charged at','દરેક પર ચાર્જ'],['visits recorded since','મુલાકાત નોંધાઈ, થી'],
+['Nothing is ever overwritten — every version is kept.','કશું ભૂંસાતું નથી — દરેક આવૃત્તિ સચવાય છે.'],
+['per diet plan, settled after every','એક ડાયટ પ્લાનના, દર'],['consultation charges counted separately','કન્સલ્ટેશન ચાર્જ અલગ ગણાય છે'],
+['plans — ','પ્લાન પછી — '],['Continued, no change','એ જ પ્લાન ચાલુ'],['Revised plan','સુધારેલો પ્લાન'],
+['Running now','અત્યારે ચાલુ'],['First plan','પહેલો પ્લાન'],['weight recorded','વજન નોંધાયું'],
+['Same plan continued','એ જ પ્લાન ચાલુ'],['Lunch rotli reduced by one','બપોરની રોટલી એક ઘટાડી'],
+['Mid-morning fruit changed to a sprouts bowl','બપોર પહેલાંનું ફળ બદલી ફણગાવેલા કઠોળ'],
+['Dinner made lighter after the blood report','રિપોર્ટ પછી રાત્રિભોજન હળવું કર્યું'],
+['Evening slot changed after hunger complaints','ભૂખની ફરિયાદ પછી સાંજનો સ્લોટ બદલ્યો'],
+['given at enrolment','નોંધણી વખતે અપાયેલો'],['of her goal','લક્ષ્યનું'],['of your goal','તમારા લક્ષ્યનું'],
+['lost so far','અત્યાર સુધી ઘટ્યું'],['per week on average','સરેરાશ પ્રતિ અઠવાડિયું'],['on average','સરેરાશ'],
+['With you since','તમારી સાથે'],['from your food list','તમારી ખોરાકની યાદીમાંથી'],['to today','આજ સુધી'],
+['sets of','સેટ ×'],['minutes','મિનિટ'],['records','રેકોર્ડ'],['people','લોકો'],
+/* content words that read fine alone */
+['charged','ચાર્જ'],['Consulting dietician','સલાહકાર ડાયટિશિયન'],['Note from your dietician','તમારા ડાયટિશિયનની નોંધ'],["kept permanently in the patient's plan history",'દર્દીના પ્લાન ઈતિહાસમાં કાયમ સચવાયેલો'],['Issued','અપાયો'],['Plan','પ્લાન'],['weight','વજન'],['Weight','વજન'],['Visit','મુલાકાત'],['visits','મુલાકાત'],
+['Plans','પ્લાન'],['plans','પ્લાન'],['Plan','પ્લાન'],['plan','પ્લાન'],
+['Veg','શાકાહારી'],['Non-veg','માંસાહારી'],['Jain','જૈન'],
+/* units */
+['kcal','કેલરી'],['KCAL','કેલરી'],['kg','કિગ્રા'],['cm','સેમી'],['yrs','વર્ષ'],['years','વર્ષ'],
+['Protein','પ્રોટીન'],['protein','પ્રોટીન'],['Carbs','કાર્બ્સ'],['carbs','કાર્બ્સ'],
+['Carbohydrate','કાર્બોહાઇડ્રેટ'],['Fibre','ફાઇબર'],['fibre','ફાઇબર'],['Fat','ચરબી'],['fat','ચરબી'],
+['Calories','કેલરી'],['calories','કેલરી'],['TARGET','લક્ષ્ય'],['Target','લક્ષ્ય'],['target','લક્ષ્ય'],
+/* measures */
+['katori','વાટકી'],['glass','ગ્લાસ'],['plate','થાળી'],['bowl','વાટકી'],['medium','મધ્યમ'],
+['pieces','નંગ'],['piece','નંગ'],['cup','કપ'],['mutthi','મુઠ્ઠી'],['thepla','થેપલા'],
+/* food groups */
+['Cereals','અનાજ'],['Pulses','કઠોળ'],['Dairy','દૂધ-દહીં'],['Drinks','પીણાં'],['Nuts','સૂકો મેવો'],
+['Snacks','નાસ્તો'],['Fruit','ફળ'],
+/* food names inside joined lists */
+['Boiled moong','બાફેલા મગ'],['Moong dal khichdi','મગની દાળની ખીચડી'],['Bajra rotla','બાજરીનો રોટલો'],
+['Jowar rotli','જુવારની રોટલી'],['Methi thepla','મેથીના થેપલા'],['Plain khakhra','સાદા ખાખરા'],
+['Vegetable poha','શાકભાજીવાળા પૌંઆ'],['Rava upma','રવાનો ઉપમા'],['Steamed dhokla','વરાળે બનાવેલા ઢોકળા'],
+['Toor dal','તુવેરની દાળ'],['Chana chaat','ચણા ચાટ'],['Sprouted matki','ફણગાવેલી મઠ'],
+['Lauki sabzi','દૂધીનું શાક'],['Tindora sabzi','ટીંડોળાનું શાક'],['Palak sabzi','પાલકનું શાક'],
+['Mixed veg salad','મિક્સ સલાડ'],['Cucumber sticks','કાકડીના ટુકડા'],['Low-fat curd','ઓછી ચરબીવાળું દહીં'],
+['Chaas (no salt)','છાશ (મીઠા વગર)'],['Toned milk','ટોન્ડ દૂધ'],['Paneer bhurji','પનીર ભુર્જી'],
+['Boiled egg white','બાફેલા ઈંડાની સફેદી'],['Grilled chicken','ગ્રિલ્ડ ચિકન'],['Warm water + lemon','હૂંફાળું પાણી + લીંબુ'],
+['Methi seed water','મેથીનું પાણી'],['Green tea','ગ્રીન ટી'],['Soaked almonds','પલાળેલી બદામ'],
+['Walnut halves','અખરોટ'],['Roasted chana','શેકેલા ચણા'],['Papaya cubes','પપૈયાના ટુકડા'],
+['Guava','જામફળ'],['Apple','સફરજન'],['Orange','સંતરા'],['Oats porridge','ઓટ્સનો પોરીજ'],
+/* slots inside composite strings */
+['Early morning','વહેલી સવાર'],['Breakfast','સવારનો નાસ્તો'],['Mid-morning','બપોર પહેલાં'],
+['Lunch','બપોરનું ભોજન'],['Dinner','રાત્રિભોજન'],['Bedtime','સૂતાં પહેલાં'],
+/* months */
+['January','જાન્યુઆરી'],['February','ફેબ્રુઆરી'],['March','માર્ચ'],['April','એપ્રિલ'],['June','જૂન'],
+['July','જુલાઈ'],['August','ઓગસ્ટ'],['September','સપ્ટેમ્બર'],['October','ઓક્ટોબર'],
+['November','નવેમ્બર'],['December','ડિસેમ્બર'],
+['Jan','જાન્યુ'],['Feb','ફેબ્રુ'],['Mar','માર્ચ'],['Apr','એપ્રિલ'],['Jun','જૂન'],
+['Jul','જુલાઈ'],['Aug','ઓગસ્ટ'],['Sep','સપ્ટે'],['Oct','ઓક્ટો'],['Nov','નવે'],['Dec','ડિસે'],
+['Monday','સોમવાર'],['Tuesday','મંગળવાર'],['Wednesday','બુધવાર'],['Thursday','ગુરુવાર'],
+['Friday','શુક્રવાર'],['Saturday','શનિવાર'],['Sunday','રવિવાર'],
+['Today','આજે'],['Yesterday','ગઈકાલે'],['am','સવારે'],['pm','સાંજે']
+];
+GU_PH = GU_PH_RAW.slice().sort((a,b)=>b[0].length-a[0].length).map(function(x){
+  var en=x[0], esc=en.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  var L=/^\w/.test(en)?'\\b':'', R=/\w$/.test(en)?'\\b':'';
+  return [new RegExp(L+esc+R,'g'), x[1]];
+});
+
+function gT(txt){
+  const k = txt.trim();
+  if(!k) return txt;
+  if(Object.prototype.hasOwnProperty.call(GU,k)) return txt.replace(k, GU[k]);
+  let out = txt, hit = false;
+  for(let i=0;i<GU_PH.length;i++){
+    const before = out;
+    out = out.replace(GU_PH[i][0], GU_PH[i][1]);
+    if(out!==before) hit = true;
+  }
+  return hit ? out : txt;
+}
+
+function translateTree(root){
+  if(LANG!=='gu' || !root) return;
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+  const jobs = [];
+  while(w.nextNode()){ const n=w.currentNode; if(n.nodeValue && n.nodeValue.trim()) jobs.push(n); }
+  jobs.forEach(n => { n.nodeValue = gT(n.nodeValue); });
+  root.querySelectorAll('[placeholder]').forEach(el => el.placeholder = gT(el.placeholder));
+  root.querySelectorAll('option').forEach(el => { if(el.textContent.trim()) el.textContent = gT(el.textContent); });
+}
+
+function applyLang(){
+  translateTree(document.querySelector('.stage'));
+  translateTree(document.getElementById('modalHost'));
+  const t=document.getElementById('toast'); if(t && LANG==='gu' && t.textContent) t.textContent=gT(t.textContent);
+}
+
+function setLang(l){
+  LANG = l;
+  document.body.classList.toggle('gu', l==='gu');
+  document.getElementById('lang-en').classList.toggle('on', l==='en');
+  document.getElementById('lang-gu').classList.toggle('on', l==='gu');
+  document.documentElement.lang = l;
+  if(MODE==='doc' && window._in) go(VIEW);
+  else { setMode(MODE); applyLang(); }
+  toast(l==='gu' ? 'આખી એપ્લિકેશન હવે ગુજરાતીમાં' : 'Back to English');
+}
+
+</script>
+<script>
+const SCREENS = {
+
+/* ---------------- DASHBOARD ---------------- */
+today(){
+  const active=PATIENTS.filter(p=>p.active);
+  const due=[active[3],active[5]].filter(Boolean);
+  const noWt=[active[6],active[1]].filter(Boolean);
+  const totalLost=r1(PATIENTS.reduce((s,p)=>s+lost(p),0));
+  const tile=(k,v,d,c)=>`<div class="stat"><div class="edge" style="background:${c}"></div>
+    <div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+  return {
+    title:'Today', sub:'Thursday, 3 September 2026',
+    actions:`<button class="btn btn-gho" onclick="go('patients')">All patients</button>
+             <button class="btn btn-pri" onclick="go('newpatient')">+ New patient</button>`,
+    body:`
+    <div class="grid g4">
+      ${tile('Patients on an active plan', active.length, 'One is on maintenance', '#177A5C')}
+      ${tile('Due for follow-up', due.length, 'Last seen over 3 weeks ago', '#D99A24')}
+      ${tile('No weight this week', noWt.length, 'Worth a reminder call', '#C0503C')}
+      ${(()=>{const d=PATIENTS.reduce((x,q)=>x+ledger(q).dueNow,0), n=PATIENTS.filter(q=>ledger(q).dueNow>0).length;
+        return `<button class="stat" style="text-align:left;width:100%" onclick="go('payments')">
+          <div class="edge" style="background:#6B5CA5"></div>
+          <div class="k">Payments due</div><div class="v">${INR(d)}</div>
+          <div class="d">${n} patients have finished a cycle</div></button>`;})()}
+    </div>
+
+    <div class="grid g2 mt" style="grid-template-columns:1.35fr 1fr">
+      ${MOB()
+        ? `<div><div class="eyebrow" style="margin-bottom:10px">Needs your attention</div>
+            ${due.map(p=>alertCard(p,'Plan issued 24 days ago','p-tur','Follow-up due')).join('')}
+            ${noWt.map(p=>alertCard(p,'No weight recorded since Monday','p-chi','Weight missing')).join('')}</div>`
+        : `<div class="card">
+        <div class="card-h"><h3>Needs your attention</h3>
+          <span class="hint">Everything else is running on plan</span></div>
+        <table><tbody>
+        ${due.map(p=>`<tr class="tclick" onclick="go('patient',${p.id})">
+          <td style="width:46px"><div class="av-sm" style="background:${avc(p.id)[0]};color:${avc(p.id)[1]}">${ini(p.n)}</div></td>
+          <td><b>${p.n}</b><div style="font-size:11.5px;color:var(--faint)">Plan issued 24 days ago</div></td>
+          <td><span class="pill p-tur">Follow-up due</span></td>
+          <td style="text-align:right;color:var(--muted)">${curW(p)} kg</td></tr>`).join('')}
+        ${noWt.map(p=>`<tr class="tclick" onclick="go('patient',${p.id})">
+          <td style="width:46px"><div class="av-sm" style="background:${avc(p.id)[0]};color:${avc(p.id)[1]}">${ini(p.n)}</div></td>
+          <td><b>${p.n}</b><div style="font-size:11.5px;color:var(--faint)">No weight recorded since Monday</div></td>
+          <td><span class="pill p-chi">Weight missing</span></td>
+          <td style="text-align:right;color:var(--muted)">${curW(p)} kg</td></tr>`).join('')}
+        </tbody></table>
+      </div>`}
+
+      <div class="card card-p">
+        <div class="eyebrow">Best progress this month</div>
+        ${(()=>{const b=[...PATIENTS].filter(p=>p.active).sort((a,c)=>lost(c)-lost(a))[0];
+          return `<div class="row" style="margin-top:14px">
+            <div class="av-sm" style="width:46px;height:46px;font-size:15px;background:${avc(b.id)[0]};color:${avc(b.id)[1]}">${ini(b.n)}</div>
+            <div><div style="font-weight:700;font-size:15px">${b.n}</div>
+              <div style="font-size:12px;color:var(--muted)">With you since ${b.since}</div></div></div>
+          <div class="dnum" style="font-size:42px;margin:18px 0 2px;color:var(--green)">${lost(b)} kg</div>
+          <div style="font-size:12.5px;color:var(--muted)">lost so far — ${goalPct(b)}% of her goal</div>
+          <div class="bar" style="margin-top:14px"><i style="width:${goalPct(b)}%"></i></div>
+          <button class="btn btn-gho btn-sm" style="margin-top:16px" onclick="go('patient',${b.id})">Open her file</button>`;})()}
+      </div>
+    </div>
+
+    ${MOB() ? `<div class="mt"><div class="eyebrow" style="margin-bottom:10px">Everyone on an active plan</div>
+      ${active.map(p=>patCard(p)).join('')}</div>` : `
+    <div class="card mt">
+      <div class="card-h"><h3>Everyone on an active plan</h3>
+        <span class="hint">Tap a row to open the file</span></div>
+      <table>
+        <thead><tr><th></th><th>Patient</th><th>Started</th><th>Now</th><th>Lost</th>
+          <th style="width:190px">Towards goal</th><th></th></tr></thead>
+        <tbody>${active.map(p=>`<tr class="tclick" onclick="go('patient',${p.id})">
+          <td style="width:46px"><div class="av-sm" style="background:${avc(p.id)[0]};color:${avc(p.id)[1]}">${ini(p.n)}</div></td>
+          <td><b>${p.n}</b><div style="font-size:11.5px;color:var(--faint)">${p.age} yrs · ${p.pref}</div></td>
+          <td style="color:var(--muted)">${p.start} kg</td>
+          <td><b>${curW(p)} kg</b></td>
+          <td><span class="pill p-grn">− ${lost(p)} kg</span></td>
+          <td><div class="bar"><i style="width:${goalPct(p)}%"></i></div>
+              <div style="font-size:11px;color:var(--faint);margin-top:4px">${goalPct(p)}% · target ${p.target} kg</div></td>
+          <td style="text-align:right;color:var(--line2)">›</td></tr>`).join('')}
+        </tbody></table>
+    </div>`}`
+  };
+},
+
+/* ---------------- PATIENTS ---------------- */
+patients(){
+  return {
+    title:'Patients', sub:`${PATIENTS.length} people, since December 2025`,
+    actions:`<input class="inp" id="psearch" placeholder="Search by name…" style="width:230px"
+              oninput="filterPat(this.value)">
+             <button class="btn btn-pri" onclick="go('newpatient')">+ New patient</button>`,
+    body: MOB()
+      ? `<div id="ptbody">${PATIENTS.map(p=>patCard(p,1)).join('')}</div>`
+      : `<div class="card"><table>
+      <thead><tr><th></th><th>Patient</th><th>With you since</th><th>Start</th><th>Now</th>
+        <th>Lost</th><th>Per week</th><th>Status</th><th></th></tr></thead>
+      <tbody id="ptbody">${PATIENTS.map(p=>`<tr class="tclick" data-n="${p.n.toLowerCase()}" onclick="go('patient',${p.id})">
+        <td style="width:46px"><div class="av-sm" style="background:${avc(p.id)[0]};color:${avc(p.id)[1]}">${ini(p.n)}</div></td>
+        <td><b>${p.n}</b><div style="font-size:11.5px;color:var(--faint)">${p.age} yrs · ${p.ph}</div></td>
+        <td style="color:var(--muted)">${p.since}</td>
+        <td style="color:var(--muted)">${p.start} kg</td>
+        <td><b>${curW(p)} kg</b></td>
+        <td><span class="pill p-grn">− ${lost(p)} kg</span></td>
+        <td style="color:var(--muted)">${perWk(p)} kg</td>
+        <td>${p.active?'<span class="pill p-inf">On plan</span>':'<span class="pill p-gry">Maintenance</span>'}</td>
+        <td style="text-align:right;color:var(--line2)">›</td></tr>`).join('')}
+      </tbody></table></div>`
+  };
+},
+
+/* ---------------- PATIENT FILE ---------------- */
+patient(){
+  const p=pat(CUR), t=planTotals(PLANS[p.id]);
+  const wts=p.wts.map(x=>x.w);
+  const visits=[
+    {d:'Today', t:'Diet plan issued', s:`${Math.round(t.c)} kcal · ${SLOTS.length} meal slots · valid for 14 days`},
+    {d:'2 weeks ago', t:'Weight recorded', s:`${wts[wts.length-2]} kg — down ${r1(wts[wts.length-2]-curW(p))} kg since`},
+    {d:'6 weeks ago', t:'Plan revised', s:'Evening slot changed to roasted chana after hunger complaints'},
+    {d:'3 months ago', t:'Blood report uploaded', s:'Attached to the visit of 12 May 2026'},
+    {d:p.since, t:'First visit — enrolled', s:`Starting weight ${p.start} kg · target ${p.target} kg`, dim:1}
+  ];
+  return {
+    title:p.n, sub:`${p.age} years · ${p.pref} · ${p.ph} · with you since ${p.since}`,
+    actions:`<button class="btn btn-gho" onclick="printPlan(0,'doc')">Download diet chart</button>
+             <button class="btn btn-gho" onclick="openWA(${p.id})">Send on WhatsApp</button>
+             <button class="btn btn-gho" onclick="go('planhistory',${p.id})">Plan history</button>
+             <button class="btn btn-pri" onclick="go('builder',${p.id})">Edit her plan</button>`,
+    body:`
+    <div class="grid g4">
+      <div class="stat"><div class="edge" style="background:#177A5C"></div>
+        <div class="k">Weight now</div><div class="v">${curW(p)}<span style="font-size:16px"> kg</span></div>
+        <div class="d">Started at ${p.start} kg</div></div>
+      <div class="stat"><div class="edge" style="background:#D99A24"></div>
+        <div class="k">Lost so far</div><div class="v">${lost(p)}<span style="font-size:16px"> kg</span></div>
+        <div class="d">${perWk(p)} kg per week on average</div></div>
+      <div class="stat"><div class="edge" style="background:#6B5CA5"></div>
+        <div class="k">BMI today</div><div class="v">${bmi(p)}</div>
+        <div class="d">Height ${p.ht} cm</div></div>
+      <div class="stat"><div class="edge" style="background:#2F6E9E"></div>
+        <div class="k">Towards goal</div><div class="v">${goalPct(p)}<span style="font-size:16px">%</span></div>
+        <div class="d">${r1(curW(p)-p.target)} kg to go</div></div>
+    </div>
+
+    <div class="grid g2 mt" style="grid-template-columns:1.5fr 1fr">
+      <div class="card">
+        <div class="card-h"><h3>Weight, week by week</h3>
+          <span class="hint">Every reading since her first visit</span></div>
+        <div style="padding:16px 8px 8px">${lineChart(wts,CW(),MOB()?230:240,p.target)}</div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Following the plan</h3><span class="hint">Last 7 weeks</span></div>
+        <div style="padding:16px 8px 8px">${barChart(p.adh,MOB()?360:420,MOB()?200:240)}</div>
+        <div style="padding:0 20px 18px" class="legend">
+          <div><i style="background:#177A5C"></i>Good week</div>
+          <div><i style="background:#D99A24"></i>Slipped a little</div>
+          <div><i style="background:#C0503C"></i>Needs a talk</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g2 mt" style="grid-template-columns:1fr 1.2fr">
+      <div class="card">
+        <div class="card-h"><h3>Her journey</h3><span class="hint">Nothing is ever overwritten</span></div>
+        <div style="padding:20px 20px 20px 8px"><div class="tl">
+          ${visits.map(v=>`<div class="tl-i ${v.dim?'dim':''}">
+            <div class="tl-d">${v.d}</div><div class="tl-t">${v.t}</div><div class="tl-s">${v.s}</div></div>`).join('')}
+        </div>
+        <div class="row" style="gap:8px;margin:4px 0 0 22px;flex-wrap:wrap">
+          <button class="btn btn-pri btn-sm" onclick="go('planhistory',${p.id})">
+            Open all ${visitCount(p)} plans</button>
+          <button class="btn btn-gho btn-sm" onclick="viewPlan(0,'doc')">View today's chart</button>
+        </div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Plan running now</h3>
+          <span class="hint">${Math.round(t.c)} kcal a day</span></div>
+        <div style="padding:18px 20px">
+          <div class="row" style="gap:22px;align-items:flex-start">
+            ${donut(t,MOB()?150:132,MOB()?22:20)}
+            <div style="flex:1">
+              ${[['Protein',t.p,'g','#177A5C'],['Carbohydrate',t.cb,'g','#D99A24'],
+                 ['Fat',t.f,'g','#C0503C'],['Fibre',t.fb,'g','#6B5CA5']].map(([k,v,u,c])=>
+                `<div class="row" style="justify-content:space-between;padding:5px 0;border-bottom:1px dashed var(--line)">
+                  <div class="row" style="gap:7px"><i style="width:9px;height:9px;border-radius:3px;background:${c};display:block"></i>
+                  <span style="font-size:12.5px;color:var(--muted);font-weight:600">${k}</span></div>
+                  <b style="font-size:13px">${v} ${u}</b></div>`).join('')}
+            </div>
+          </div>
+          <div style="margin-top:16px;padding:12px 14px;background:var(--green-tint);border-radius:var(--r-s);
+            font-size:12.5px;color:var(--ink2)"><b>Your note:</b> ${p.note}</div>
+          <button class="btn btn-gho btn-sm" style="margin-top:14px" onclick="go('builder',${p.id})">Open the plan builder</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g2 mt" style="grid-template-columns:1fr 1fr;align-items:start">
+      <div class="card">
+        <div class="card-h"><h3>Her account</h3>
+          <span class="hint">${INR(PLAN_FEE)} a plan, settled every ${CYCLE} plans</span></div>
+        <div style="padding:16px 20px 18px">
+          ${(()=>{const L=ledger(p);return `
+          <div class="grid g2 keep2" style="gap:10px">
+            <div><div style="font-size:11.5px;color:var(--muted);font-weight:600">Plans given</div>
+              <b style="font-size:19px;font-family:var(--dis)">${L.plans}</b></div>
+            <div><div style="font-size:11.5px;color:var(--muted);font-weight:600">Paid till date</div>
+              <b style="font-size:19px;font-family:var(--dis)">${INR(L.paid)}</b></div>
+            <div><div style="font-size:11.5px;color:var(--muted);font-weight:600">Due now</div>
+              <b style="font-size:19px;font-family:var(--dis);color:${L.dueNow>0?'var(--chilli)':'var(--green)'}">${INR(L.dueNow)}</b></div>
+            <div><div style="font-size:11.5px;color:var(--muted);font-weight:600">Cycle running</div>
+              <b style="font-size:19px;font-family:var(--dis)">${L.inCycle}/${CYCLE}</b></div>
+          </div>
+          <div class="row" style="gap:6px;margin-top:14px;flex-wrap:wrap">
+            <span class="pill ${L.dueNow>0?'p-chi':'p-grn'}">${L.status}</span>
+            <span class="pill p-gry">Last payment ${L.lastPay}</span>
+            <span class="pill p-inf">Consultation ${INR(L.consult)} billed separately</span></div>
+          <div class="row" style="gap:8px;margin-top:14px">
+            <button class="btn btn-gho btn-sm" onclick="openPay(${p.id})">Record a payment</button>
+            <button class="btn btn-gho btn-sm" onclick="go('payments')">Open the payment panel</button></div>`;})()}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Next follow-up</h3><span class="hint">Sent to her on WhatsApp</span></div>
+        <div style="padding:16px 20px 18px">
+          <div class="row" style="gap:16px;align-items:center">
+            <div style="width:60px;height:60px;border-radius:16px;background:var(--green-soft);
+              display:grid;place-items:center;font-family:var(--dis);font-size:22px;font-weight:600;color:var(--neem)">
+              ${nextVisit(p).split(' ')[0]}</div>
+            <div><b style="font-size:15px">${nextVisit(p)}</b>
+              <div style="font-size:12.5px;color:var(--muted);margin-top:2px">Weighing and plan review</div></div>
+          </div>
+          <div style="margin-top:14px;padding:12px 14px;background:var(--green-tint);border-radius:var(--r-s);
+            font-size:12.5px;color:var(--ink2);line-height:1.6">
+            One tap sends her the payment position and this date together. You press send; there is
+            no message charge and nothing to renew.</div>
+          <button class="btn btn-pri btn-sm" style="margin-top:14px" onclick="openWA(${p.id})">See the message</button>
+        </div>
+      </div>
+    </div>`
+  };
+},
+
+/* ---------------- PAYMENTS & DUES  (added 28 Aug 2026) ---------------- */
+payments(){
+  const active = PATIENTS.slice();
+  const rows = active.map(p=>({p, L:ledger(p)}));
+  const collected = rows.reduce((s,r)=>s+r.L.paid,0);
+  const dues      = rows.reduce((s,r)=>s+r.L.dueNow,0);
+  const running   = rows.reduce((s,r)=>s+r.L.running,0);
+  const dueCount  = rows.filter(r=>r.L.dueNow>0).length;
+  const thisMonth = MONTH_COLLECTION[MONTH_COLLECTION.length-1].v;
+  const rec = receipts().slice(0,8);
+
+  const cyc = L => {
+    const dots=[];
+    for(let i=0;i<CYCLE;i++) dots.push(`<i style="width:9px;height:9px;border-radius:50%;display:block;
+      background:${i<L.inCycle?'#177A5C':'#DBE3DF'}"></i>`);
+    return `<div class="row" style="gap:5px">${dots.join('')}
+      <span style="font-size:11.5px;color:var(--faint);font-weight:600;margin-left:4px">${L.inCycle}/${CYCLE}</span></div>`;
+  };
+
+  const table = MOB()
+   ? rows.map(({p,L})=>`<div class="mrow" style="display:block">
+      <div class="row" style="align-items:flex-start">
+        <div style="flex:1"><div class="mrow-t">${p.n}</div>
+          <div class="mrow-s">${L.plans} plans given &middot; ${INR(L.billed)} billed</div></div>
+        <span class="pill ${L.dueNow>0?'p-chi':(L.inCycle===0?'p-grn':'p-gry')}">${L.status}</span></div>
+      <div class="mrow-kv"><div>Paid<b>${INR(L.paid)}</b></div>
+        <div>Due now<b style="color:${L.dueNow>0?'var(--chilli)':'var(--green)'}">${INR(L.dueNow)}</b></div>
+        <div>Running<b>${INR(L.running)}</b></div></div>
+      <div style="margin-top:10px">${cyc(L)}</div>
+      <div class="row" style="gap:8px;margin-top:11px">
+        <button class="btn btn-gho btn-sm" onclick="openPay(${p.id})">Record payment</button>
+        <button class="btn btn-gho btn-sm" onclick="openWA(${p.id})">Send on WhatsApp</button></div>
+     </div>`).join('')
+   : `<div class="card"><table>
+      <thead><tr><th>Patient</th><th>Plans given</th><th>This cycle</th><th>Paid</th>
+        <th>Due now</th><th>Last payment</th><th>Status</th><th></th></tr></thead>
+      <tbody>${rows.map(({p,L})=>`<tr>
+        <td><b>${p.n}</b><div style="font-size:11.5px;color:var(--faint)">${p.ph}</div></td>
+        <td><b>${L.plans}</b> <span style="color:var(--faint);font-size:11.5px">&times; ${INR(PLAN_FEE)}</span></td>
+        <td>${cyc(L)}</td>
+        <td style="color:var(--muted)">${INR(L.paid)}</td>
+        <td><b style="color:${L.dueNow>0?'var(--chilli)':'var(--green)'}">${INR(L.dueNow)}</b></td>
+        <td style="color:var(--muted)">${L.lastPay}</td>
+        <td><span class="pill ${L.dueNow>0?'p-chi':(L.inCycle===0?'p-grn':'p-gry')}">${L.status}</span></td>
+        <td style="text-align:right;white-space:nowrap">
+          <button class="btn btn-gho btn-sm" onclick="openPay(${p.id})">Record</button>
+          <button class="btn btn-gho btn-sm" onclick="openWA(${p.id})">WhatsApp</button></td></tr>`).join('')}
+      </tbody></table></div>`;
+
+  return {
+    title:'Payments and dues',
+    sub:`${INR(PLAN_FEE)} per diet plan, settled after every ${CYCLE} plans \u2014 consultation charges counted separately`,
+    actions:`<button class="btn btn-gho" onclick="toast('A month-wise collection statement would download here')">Download statement</button>
+             <button class="btn btn-pri" onclick="openPay(${rows.find(r=>r.L.dueNow>0)?rows.find(r=>r.L.dueNow>0).p.id:1})">Record a payment</button>`,
+    body:`
+    <div class="grid g4">
+      <div class="stat"><div class="edge" style="background:#177A5C"></div>
+        <div class="k">Collected this month</div><div class="v">${INR(thisMonth)}</div>
+        <div class="d">${INR(collected)} since you started</div></div>
+      <div class="stat"><div class="edge" style="background:#C0503C"></div>
+        <div class="k">Outstanding dues</div><div class="v">${INR(dues)}</div>
+        <div class="d">${dueCount} patients have finished a cycle</div></div>
+      <div class="stat"><div class="edge" style="background:#D99A24"></div>
+        <div class="k">Cycle running</div><div class="v">${INR(running)}</div>
+        <div class="d">Not due yet \u2014 cycles still open</div></div>
+      <div class="stat"><div class="edge" style="background:#2F6E9E"></div>
+        <div class="k">Plans issued so far</div><div class="v">${rows.reduce((s,r)=>s+r.L.plans,0)}</div>
+        <div class="d">Every one of them charged at ${INR(PLAN_FEE)}</div></div>
+    </div>
+
+    <div class="grid g2 mt" style="grid-template-columns:1.4fr 1fr;align-items:start">
+      <div>
+        <div class="card-h" style="border:none;padding:0 0 12px"><h3>Patient by patient</h3>
+          <span class="hint">Green dots are the plans given in the cycle running now</span></div>
+        ${table}
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-h"><h3>What you collected</h3><span class="hint">Last six months</span></div>
+          <div style="padding:16px 8px 8px">${moneyBars(MOB()?360:420, MOB()?190:210)}</div>
+        </div>
+        <div class="card mt">
+          <div class="card-h"><h3>Recent receipts</h3><span class="hint">Newest first</span></div>
+          <div style="padding:6px 20px 16px">
+            ${rec.map(r=>`<div class="row" style="justify-content:space-between;padding:10px 0;border-bottom:1px dashed var(--line)">
+              <div><b style="font-size:13px">${r.p.n}</b>
+                <div style="font-size:11.5px;color:var(--faint)">${r.date} &middot; ${r.plans} plans &middot; ${r.mode}</div></div>
+              <b style="font-size:13.5px;color:var(--green)">${INR(r.amt)}</b></div>`).join('')}
+          </div>
+        </div>
+        <div class="card card-p mt" style="background:var(--green-tint);border-color:var(--primary-300)">
+          <div class="eyebrow">How this counts</div>
+          <p style="font-size:13px;color:var(--ink2);margin:10px 0 0;line-height:1.65">
+            Every diet plan you issue adds ${INR(PLAN_FEE)} to that patient's account. After the
+            ${CYCLE}th plan the cycle closes and the amount becomes due \u2014 usually one month of visits.
+            Your consultation charge is recorded separately, so this figure is only your diet plan income.</p>
+        </div>
+      </div>
+    </div>`
+  };
+},
+
+/* ---------------- DIET PLAN HISTORY  (added 28 Aug 2026) ---------------- */
+planhistory(){
+  const p=pat(CUR), H=planHistory(p);
+  if(HIST_A>=H.length) HIST_A=Math.min(4,H.length-1);
+  if(HIST_B>=H.length) HIST_B=0;
+  const A=H[HIST_A], B=H[HIST_B];
+  const older = s2d(A.date) <= s2d(B.date) ? A : B;
+  const newer = older===A ? B : A;
+  const diff = planDiff(older.plan, newer.plan);
+  const kcals = H.slice().reverse().map(h=>h.kcal);
+
+  const opt = (sel)=>H.map((h,i)=>`<option value="${i}" ${i===sel?'selected':''}>${h.date} \u2014 ${h.kcal} kcal</option>`).join('');
+  const slotRows = (plan)=>SLOTS.map(s=>{
+    const items=(plan[s.id]||[]);
+    return `<div style="padding:9px 0;border-bottom:1px dashed var(--line)">
+      <div style="font-size:11px;color:var(--faint);font-weight:700;letter-spacing:.4px;text-transform:uppercase">${s.name}</div>
+      <div style="font-size:12.5px;color:var(--ink2);margin-top:3px">${
+        items.length? items.map(([fid,q])=>esc(food(fid).n)+(q>1?' \u00D7 '+q:'')).join(', ') : '\u2014'}</div></div>`;
+  }).join('');
+
+  return {
+    title:`Plan history \u2014 ${p.n}`,
+    sub:`${H.length} visits recorded since ${p.since}. Nothing is ever overwritten \u2014 every version is kept.`,
+    actions:`<select class="inp" style="width:auto" onchange="go('planhistory',+this.value)">
+              ${PATIENTS.map(x=>`<option value="${x.id}" ${x.id===p.id?'selected':''}>${x.n}</option>`).join('')}</select>
+             <button class="btn btn-gho" onclick="printAllPlans()">Download all plans as PDF</button>
+             <button class="btn btn-pri" onclick="go('builder',${p.id})">Issue a new plan</button>`,
+    body:`
+    <div class="grid g4">
+      <div class="stat"><div class="edge" style="background:#177A5C"></div>
+        <div class="k">Plans on record</div><div class="v">${H.length}</div>
+        <div class="d">From ${H[H.length-1].date} to today</div></div>
+      <div class="stat"><div class="edge" style="background:#D99A24"></div>
+        <div class="k">Revisions made</div><div class="v">${H.filter(h=>h.kind!=='Continued, no change').length}</div>
+        <div class="d">The rest were continued unchanged</div></div>
+      <div class="stat"><div class="edge" style="background:#6B5CA5"></div>
+        <div class="k">Calories then</div><div class="v">${H[H.length-1].kcal}</div>
+        <div class="d">At her very first plan</div></div>
+      <div class="stat"><div class="edge" style="background:#2F6E9E"></div>
+        <div class="k">Calories now</div><div class="v">${H[0].kcal}</div>
+        <div class="d">Weight ${H[0].wt} kg today</div></div>
+    </div>
+
+    <div class="card card-p mt" style="background:var(--green-tint);border-color:#B6DCCB">
+      <div class="row" style="align-items:flex-start;gap:13px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0E5642" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></svg>
+        <div><b style="font-size:13.5px">Every one of these ${H.length} plans can be opened in full and saved as a PDF.</b>
+          <div style="font-size:13px;color:var(--ink2);margin-top:3px;line-height:1.55">
+          Open any visit below to see the complete chart exactly as it was given, print it, send it on
+          WhatsApp, or use it as the starting point for a new plan. Nothing is ever overwritten.</div></div>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <div class="card-h"><h3>Calories across every plan she has been given</h3>
+        <span class="hint">Oldest on the left</span></div>
+      <div style="padding:16px 8px 8px">${(()=>{const av=Math.round(kcals.reduce((a,b)=>a+b,0)/kcals.length);
+        return lineChart(kcals, CW(), MOB()?200:210, av, 'AVERAGE '+av+' kcal');})()}</div>
+    </div>
+
+    <div class="grid g2 mt" style="grid-template-columns:.85fr 1.15fr;align-items:start">
+      <div class="card">
+        <div class="card-h"><h3>Every visit</h3><span class="hint">Newest first</span></div>
+        <div style="padding:16px 20px 18px;max-height:520px;overflow:auto"><div class="tl">
+          ${H.map((h,i)=>`<div class="tl-i ${h.kind==='Continued, no change'?'dim':''}">
+            <div class="tl-d">Visit ${h.no} &middot; ${h.date}</div>
+            <div class="tl-t">${h.kind} &middot; ${h.kcal} kcal</div>
+            <div class="tl-s">${h.note} &middot; weight ${h.wt} kg &middot; charged ${INR(h.fee)}</div>
+            <div class="row" style="gap:7px;margin-top:7px;flex-wrap:wrap">
+              <button class="btn btn-pri btn-sm" onclick="viewPlan(${i},'doc')">View full plan</button>
+              <button class="btn btn-gho btn-sm" onclick="printPlan(${i},'doc')">PDF</button>
+              <button class="btn btn-gho btn-sm" onclick="setHist(${i},'a')">Compare from here</button>
+              <button class="btn btn-gho btn-sm" onclick="setHist(${i},'b')">Compare to here</button></div>
+          </div>`).join('')}
+        </div></div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-h"><h3>Compare two versions</h3>
+            <span class="hint">What you actually changed, and when</span></div>
+          <div style="padding:16px 20px">
+            <div class="grid g2" style="gap:12px">
+              <div class="field" style="margin:0"><label class="lbl">Older version</label>
+                <select class="inp" onchange="setHist(+this.value,'a')">${opt(HIST_A)}</select></div>
+              <div class="field" style="margin:0"><label class="lbl">Newer version</label>
+                <select class="inp" onchange="setHist(+this.value,'b')">${opt(HIST_B)}</select></div>
+            </div>
+            <div style="margin-top:14px">
+              ${diff.length? diff.map(d=>`<div class="row" style="gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)">
+                  <span class="pill ${d.k==='add'?'p-grn':d.k==='rm'?'p-chi':'p-tur'}">${d.k==='add'?'Added':d.k==='rm'?'Removed':'Changed'}</span>
+                  <div style="flex:1"><b style="font-size:12.5px">${d.slot}</b>
+                    <div style="font-size:12.5px;color:var(--muted)">${d.txt}</div></div></div>`).join('')
+                : `<div style="padding:16px;background:var(--green-tint);border-radius:var(--r-s);font-size:13px;color:var(--ink2)">
+                     These two versions are identical \u2014 the plan was continued unchanged between these visits.</div>`}
+            </div>
+            <div class="row" style="gap:8px;margin-top:14px;font-size:12px;color:var(--faint)">
+              <b>${older.date}</b> &rarr; <b>${newer.date}</b> &middot;
+              ${older.kcal} kcal &rarr; ${newer.kcal} kcal &middot;
+              ${older.wt} kg &rarr; ${newer.wt} kg</div>
+          </div>
+        </div>
+
+        <div class="grid g2 mt keep2" style="gap:12px">
+          <div class="card">
+            <div class="card-h"><h3>${older.date}</h3><span class="hint">${older.kcal} kcal</span></div>
+            <div style="padding:6px 18px 10px">${slotRows(older.plan)}</div>
+            <div class="row" style="gap:7px;padding:0 18px 16px">
+              <button class="btn btn-gho btn-sm" onclick="viewPlan(${H.indexOf(older)},'doc')">Open in full</button>
+              <button class="btn btn-gho btn-sm" onclick="printPlan(${H.indexOf(older)},'doc')">PDF</button></div>
+          </div>
+          <div class="card" style="border-color:#7FC0A9">
+            <div class="card-h" style="background:var(--green-tint)"><h3>${newer.date}</h3>
+              <span class="hint">${newer.kcal} kcal</span></div>
+            <div style="padding:6px 18px 10px">${slotRows(newer.plan)}</div>
+            <div class="row" style="gap:7px;padding:0 18px 16px">
+              <button class="btn btn-gho btn-sm" onclick="viewPlan(${H.indexOf(newer)},'doc')">Open in full</button>
+              <button class="btn btn-gho btn-sm" onclick="printPlan(${H.indexOf(newer)},'doc')">PDF</button></div>
+          </div>
+        </div>
+      </div>
+    </div>`
+  };
+},
+
+/* ---------------- NEW PATIENT ---------------- */
+newpatient(){
+  const F=(l,v,ph)=>`<div class="field"><label class="lbl">${l}</label>
+    <input class="inp" ${v?`value="${v}"`:''} placeholder="${ph||''}"></div>`;
+  return {
+    title:'Register a new patient', sub:'This replaces the front page of the paper file',
+    actions:`<button class="btn btn-gho" onclick="go('patients')">Cancel</button>
+             <button class="btn btn-pri" onclick="toast('Patient registered — her file is now open')">Save and open her file</button>`,
+    body:`<div class="grid g2" style="grid-template-columns:1.2fr .8fr;align-items:start">
+      <div class="card card-p">
+        <div class="eyebrow">Who she is</div>
+        <div class="grid g2" style="margin-top:14px">
+          ${F('Full name','','e.g. Ritu Chauhan')}${F('Mobile number','','98xxx xxxxx')}
+          ${F('Age','','years')}
+          <div class="field"><label class="lbl">Food preference</label>
+            <select class="inp"><option>Vegetarian</option><option>Non-vegetarian</option><option>Jain</option><option>Eggetarian</option></select></div>
+        </div>
+        <div class="eyebrow" style="margin-top:12px">Where she is starting from</div>
+        <div class="grid g3" style="margin-top:14px">
+          ${F('Height','','cm')}${F('Weight today','','kg')}${F('Target weight','','kg')}
+        </div>
+        <div class="field"><label class="lbl">Medical notes and allergies</label>
+          <textarea class="inp" rows="3" placeholder="Thyroid, PCOS, sugar, knee pain, foods to avoid…"></textarea></div>
+        <div class="field"><label class="lbl">Your own note about her</label>
+          <textarea class="inp" rows="2" placeholder="Shift work, family cooking habits, what will be hard for her…"></textarea></div>
+      </div>
+      <div>
+        <div class="card card-p">
+          <div class="eyebrow">Consent</div>
+          <p style="font-size:13px;color:var(--muted);margin:10px 0 14px">
+            Before saving, the patient agrees that her records may be stored in this system.
+            This is taken once and kept with her file.</p>
+          <label class="row" style="gap:9px;font-size:13px;font-weight:600;cursor:pointer">
+            <input type="checkbox" checked style="width:16px;height:16px;accent-color:#177A5C">
+            She has agreed</label>
+        </div>
+        <div class="card card-p" style="margin-top:16px;background:var(--green-tint);border-color:var(--primary-300)">
+          <div class="eyebrow">What happens next</div>
+          <p style="font-size:13px;color:var(--ink2);margin:10px 0 0;line-height:1.6">
+            Her file opens straight away. A 6-digit PIN is generated for her phone, which you can read
+            out at the counter. She sees nothing until you issue her first plan.</p>
+        </div>
+      </div>
+    </div>`
+  };
+},
+
+/* ---------------- PLAN BUILDER ---------------- */
+builder(){
+  const p=pat(CUR);
+  if(!PLAN_DRAFT || PLAN_DRAFT._id!==p.id) PLAN_DRAFT=JSON.parse(JSON.stringify({...PLANS[p.id],_id:p.id}));
+  return {
+    title:`Diet plan — ${p.n}`, sub:'You can only pick from your own food list, so nothing unapproved reaches a patient',
+    actions:`<select class="inp" style="width:auto" onchange="go('builder',+this.value)">
+              ${PATIENTS.map(x=>`<option value="${x.id}" ${x.id===p.id?'selected':''}>${x.n}</option>`).join('')}</select>
+             <button class="btn btn-gho" onclick="saveTemplate()">Save as template</button>
+             <button class="btn btn-pri" onclick="issuePlan()">Issue this plan</button>`,
+    body: MOB()
+      ? `<div id="sideWrap">${renderPlanSide()}</div>
+         <div id="slotWrap" style="margin-top:16px">${renderSlots()}</div>
+         <button class="btn btn-pri" style="width:100%;justify-content:center;margin-top:6px"
+           onclick="issuePlan()">Issue this plan to ${p.n.split(' ')[0]}</button>`
+      : `<div class="grid g2" style="grid-template-columns:1.45fr .55fr;align-items:start">
+      <div id="slotWrap">${renderSlots()}</div>
+      <div id="sideWrap" style="position:sticky;top:128px">${renderPlanSide()}</div>
+    </div>`
+  };
+},
+
+/* ---------------- FOOD LIST ---------------- */
+foods(){
+  const groups=[...new Set(FOODS.map(f=>f.g))];
+  return {
+    title:'Your food list', sub:`${FOODS.length} items, in the measures you already use at the clinic \u2014 tap any item for its pie chart`,
+    actions:`<input class="inp" id="fsearch" placeholder="Search food…" style="width:210px" oninput="filterFood(this.value)">
+             <button class="btn btn-gho" onclick="toast('An Excel of your food list would download here')">Download as Excel</button>
+             <button class="btn btn-pri" onclick="toast('You can add your own items at any time, without calling us')">+ Add food</button>`,
+    body: (MOB() ? `<div id="ftbody">${FOODS.map(f=>foodCard(f)).join('')}</div>` : `<div class="card"><table>
+      <thead><tr><th>Split</th><th>Food</th><th>Measure</th><th>Group</th><th>Calories</th><th>Protein</th>
+        <th>Carbs</th><th>Fat</th><th>Fibre</th><th></th></tr></thead>
+      <tbody id="ftbody">${FOODS.map(f=>`<tr data-n="${f.n.toLowerCase()} ${f.g.toLowerCase()}"
+        style="cursor:pointer" onclick="openFood(${f.id})">
+        <td style="width:52px">${pie(f,42)}</td>
+        <td><b>${f.n}</b>${f.v?'':' <span class="pill p-chi" style="margin-left:6px">Non-veg</span>'}</td>
+        <td style="color:var(--muted)">${f.m}</td>
+        <td><span class="pill p-gry">${f.g}</span></td>
+        <td><b>${f.c}</b> <span style="color:var(--faint);font-size:11.5px">kcal</span></td>
+        <td style="color:var(--muted)">${f.p} g</td><td style="color:var(--muted)">${f.cb} g</td>
+        <td style="color:var(--muted)">${f.f} g</td><td style="color:var(--muted)">${f.fb} g</td>
+        <td style="text-align:right"><button class="btn-qui btn" style="padding:4px 9px;font-size:12px"
+          onclick="event.stopPropagation();openFood(${f.id})">Open chart</button></td></tr>`).join('')}
+      </tbody></table></div>`) + `
+      <div class="card card-p mt" style="background:var(--turmeric-soft);border-color:#EBD9B4">
+        <div class="row" style="align-items:flex-start;gap:12px">
+          <div style="font-size:19px">⚑</div>
+          <div><b style="font-size:13.5px">Every item now carries its own pie chart.</b>
+          <div style="font-size:13px;color:#7A5209;margin-top:3px;line-height:1.55">
+          Calories, protein, carbohydrate, fat and fibre, split on one picture. Tap any row to open it
+          full size. The same chart appears on the patient's phone.</div>
+          <b style="font-size:13.5px;display:block;margin-top:12px">These values are yours, not ours.</b>
+          <div style="font-size:13px;color:#7A5209;margin-top:3px;line-height:1.55">
+          We load your list from the sheet you fill in, and you check every value before we go live.
+          Nothing enters this list that you have not approved.</div></div></div>
+      </div>`
+  };
+},
+
+/* ---------------- RECIPES ---------------- */
+recipes(){
+  return {
+    title:'Your recipes', sub:'Written once, attached to any plan afterwards',
+    actions:`<button class="btn btn-pri" onclick="toast('You would write a new recipe here')">+ Add recipe</button>`,
+    body:`<div class="grid g2">${RECIPES.map(r=>`
+      <div class="card card-p">
+        <div class="row" style="align-items:flex-start">
+          <div style="flex:1">
+            <div class="row" style="gap:8px"><h3 style="margin:0;font-size:16px;font-family:var(--dis);font-weight:600">${r.n}</h3>
+              <span class="pill p-grn">${r.tag}</span></div>
+            <div style="font-size:12px;color:var(--faint);margin-top:2px">${r.s}</div>
+          </div>
+          <div style="text-align:right"><div class="dnum" style="font-size:26px;color:var(--green)">${r.c}</div>
+            <div style="font-size:10.5px;color:var(--faint);font-weight:700;letter-spacing:1px">KCAL</div></div>
+        </div>
+        <div class="row" style="gap:8px;margin-top:12px">
+          <span class="pill p-grn">Protein ${r.p} g</span><span class="pill p-tur">Carbs ${r.cb} g</span>
+          <span class="pill p-chi">Fat ${r.f} g</span></div>
+        <div class="eyebrow" style="margin-top:16px">What goes in</div>
+        <p style="font-size:12.5px;color:var(--ink2);margin:6px 0 0;line-height:1.65">${r.ing}</p>
+        <div class="eyebrow" style="margin-top:14px">How to make it</div>
+        <p style="font-size:12.5px;color:var(--muted);margin:6px 0 0;line-height:1.65">${r.mth}</p>
+        <button class="btn btn-gho btn-sm" style="margin-top:15px"
+          onclick="toast('Added to the plan you have open')">Attach to a plan</button>
+      </div>`).join('')}</div>`
+  };
+},
+
+/* ---------------- EXERCISES ---------------- */
+exercise(){
+  return {
+    title:'Your exercises', sub:'Videos sit unlisted on your own YouTube channel — free, and never findable in search',
+    actions:`<button class="btn btn-pri" onclick="toast('You would add an exercise and paste its link here')">+ Add exercise</button>`,
+    body:`<div class="grid g3">${EXERCISES.map(e=>`
+      <div class="card">
+        <div style="height:118px;background:linear-gradient(135deg,#0E5642,#1F8C68);
+          display:grid;place-items:center;position:relative">
+          <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.94);
+            display:grid;place-items:center">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="#0E5642"><path d="M8 5v14l11-7z"/></svg></div>
+          <span class="pill" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,.4);color:#fff">${e.d}</span>
+        </div>
+        <div style="padding:15px 17px 17px">
+          <b style="font-size:14px">${e.n}</b>
+          <div class="row" style="gap:7px;margin-top:7px"><span class="pill p-inf">${e.a}</span></div>
+          <p style="font-size:12.5px;color:var(--muted);margin:11px 0 0;line-height:1.55">${e.note}</p>
+          <div style="font-size:11px;color:var(--faint);margin-top:11px;font-weight:600">▸ ${e.vid}</div>
+          <button class="btn btn-gho btn-sm" style="margin-top:13px;width:100%;justify-content:center"
+            onclick="toast('Assigned — she will see it on her phone')">Assign to a patient</button>
+        </div>
+      </div>`).join('')}</div>`
+  };
+},
+
+/* ---------------- SAFETY ---------------- */
+safety(){
+  return {
+    title:'Backup & safety', sub:'Nothing in this system can be lost by accident',
+    actions:`<button class="btn btn-gho" onclick="toast('A full Excel of every record would download here')">Download everything</button>
+             <button class="btn btn-pri" onclick="toast('Backup taken — a fresh copy is stored')">Back up now</button>`,
+    body:`
+    <div class="grid g3">
+      <div class="stat"><div class="edge" style="background:#177A5C"></div>
+        <div class="k">Last backup</div><div class="v" style="font-size:22px">2:00 am</div>
+        <div class="d">Automatic, every night</div></div>
+      <div class="stat"><div class="edge" style="background:#2F6E9E"></div>
+        <div class="k">Copies kept</div><div class="v">30 <span style="font-size:15px">+ 12</span></div>
+        <div class="d">Last 30 nights, last 12 months</div></div>
+      <div class="stat"><div class="edge" style="background:#D99A24"></div>
+        <div class="k">In the recycle bin</div><div class="v">${RECYCLE.length}</div>
+        <div class="d">Restorable for 90 days</div></div>
+    </div>
+
+    ${MOB() ? `<div class="mt"><div class="eyebrow" style="margin-bottom:10px">Recycle bin</div>
+      ${RECYCLE.map((r,i)=>`<div class="mrow" style="display:block">
+        <div class="mrow-t">${r.what}</div>
+        <div class="mrow-s">Deleted by ${r.by} · ${r.when}</div>
+        <div class="row" style="justify-content:space-between;margin-top:11px">
+          <span class="pill p-tur">${r.left} left</span>
+          <button class="btn btn-gho btn-sm" onclick="restore(${i})">Restore</button></div>
+      </div>`).join('')}</div>` : `
+    <div class="card mt">
+      <div class="card-h"><h3>Recycle bin</h3>
+        <span class="hint">Deleting never erases — it moves the record here first</span></div>
+      <table>
+        <thead><tr><th>What was deleted</th><th>By whom</th><th>When</th><th>Time left</th><th></th></tr></thead>
+        <tbody>${RECYCLE.map((r,i)=>`<tr>
+          <td><b>${r.what}</b></td><td style="color:var(--muted)">${r.by}</td>
+          <td style="color:var(--muted)">${r.when}</td><td><span class="pill p-tur">${r.left}</span></td>
+          <td style="text-align:right"><button class="btn btn-gho btn-sm" onclick="restore(${i})">Restore</button></td>
+        </tr>`).join('')}</tbody></table>
+    </div>`}
+
+    <div class="grid g2 mt">
+      <div class="card">
+        <div class="card-h"><h3>Backup history</h3><span class="hint">Kept away from the main system</span></div>
+        <table><tbody>${BACKUPS.map(b=>`<tr>
+          <td><b>${b.when}</b><div style="font-size:11.5px;color:var(--faint)">${b.type}</div></td>
+          <td style="color:var(--muted)">${b.size}</td>
+          <td>${b.st==='keep'?'<span class="pill p-jam">Kept 12 months</span>':'<span class="pill p-grn">Verified</span>'}</td>
+          <td style="text-align:right"><button class="btn btn-gho btn-sm"
+            onclick="askRestore('${b.when}')">Restore this</button></td></tr>`).join('')}
+        </tbody></table>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Who changed what</h3><span class="hint">Permanent, and editable by nobody</span></div>
+        <table><tbody>${AUDIT.map(a=>`<tr>
+          <td><b>${a.act}</b><div style="font-size:11.5px;color:var(--faint)">${a.obj}</div></td>
+          <td style="color:var(--muted)">${a.who}</td>
+          <td style="text-align:right;color:var(--faint);font-size:12px">${a.when}</td></tr>`).join('')}
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="card card-p mt" style="background:var(--green-tint);border-color:#B6DCCB">
+      <div class="row" style="align-items:flex-start;gap:14px">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0E5642" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="M9 12l2 2 4-4"/></svg>
+        <div><b style="font-size:14px">Only your login can erase anything permanently.</b>
+          <div style="font-size:13px;color:var(--ink2);margin-top:4px;line-height:1.6">
+          The reception login cannot empty this bin. When you do it yourself, the system asks twice and
+          makes you type the clinic name first. Before any update to the software, a full backup is taken
+          automatically — nobody has to remember to do it.</div></div>
+      </div>
+    </div>`
+  };
+},
+
+/* ---------------- SCREEN INDEX ---------------- */
+index(){
+  const D=[
+    ['01','Sign in','How you open the system each morning',"signout()"],
+    ['02','Today','The dashboard you land on','go(\'today\')'],
+    ['03','Patients','Everyone, searchable','go(\'patients\')'],
+    ['04','Patient file','One patient — her whole journey','go(\'patient\',1)'],
+    ['05','Register a patient','Replaces the front page of the paper file','go(\'newpatient\')'],
+    ['06','Diet plan builder','Where you spend most of your time','go(\'builder\',1)'],
+    ['07','Food list','Your own foods and their values','go(\'foods\')'],
+    ['08','Recipes','Your recipes in one format','go(\'recipes\')'],
+    ['09','Exercises','Your videos, unlisted on YouTube','go(\'exercise\')'],
+    ['10','Backup & safety','Recycle bin, backups, change log','go(\'safety\')'],
+    ['11','Plan history','Every version of every plan, side by side','go(\'planhistory\',1)'],
+    ['12','Payments and dues','\u20B9600 a plan, settled every 4 plans','go(\'payments\')'],
+    ['13','A past diet chart','The full plan, printable as a PDF','go(\'planhistory\',1);viewPlan(4,\'doc\')'],
+    ['14','Food pie chart','Calories, protein, carbs, fat and fibre','openFood(2)'],
+    ['15','WhatsApp message','Payment status and the next visit date','openWA(2)']
+  ];
+  const P=[
+    ['15','Her sign in','Mobile number and a 6-digit PIN','openPat(\'login\')'],
+    ['16','Today','Her plan for the day','openPat(\'today\')'],
+    ['17','Meal detail','One meal, and a pie chart per item','openPat(\'meal\')'],
+    ['18','Progress','Weight, weeks, and her goal','openPat(\'progress\')'],
+    ['19','Her plans','Every plan she has been given','openPat(\'history\')'],
+    ['20','An old plan','What she was eating on that date','openPat(\'planview\')'],
+    ['21','Her payments','What she has paid and what is due','openPat(\'money\')'],
+    ['22','Exercise','The video you assigned her','openPat(\'exercise\')']
+  ];
+  const blk=(rows)=>`<div class="idx">${rows.map(([n,t,s,fn])=>
+    `<button onclick="${fn}"><div class="n">SCREEN ${n}</div><div class="t">${t}</div><div class="s">${s}</div></button>`).join('')}</div>`;
+  return {
+    title:'All screens', sub:'Every screen in the prototype \u2014 open any one directly to test it. Screens 11\u201314 and 20\u201321 were added after the meeting of 28 August 2026.',
+    body:`<div class="eyebrow">What you see — on a laptop or tablet</div>
+      <div style="margin-top:12px">${blk(D)}</div>
+      <div class="eyebrow" style="margin-top:30px">What your patient sees — on her phone</div>
+      <div style="margin-top:12px">${blk(P)}</div>`
+  };
+}
+
+};
+</script>
+<script>
+/* ================= plan builder ================= */
+function renderSlots(){
+  return SLOTS.map(s=>{
+    const items=PLAN_DRAFT[s.id]||[];
+    return `<div class="slot">
+      <div class="slot-h"><b>${s.name}</b><span class="time">${s.time}</span>
+        <span class="kc">${slotTotal(items)} kcal</span></div>
+      <div class="slot-b">
+        ${items.length?items.map(([fid,q],i)=>{const f=food(fid); if(!f) return '';
+          return `<div class="fitem">
+            <div><div class="nm">${f.n}</div><div class="qt">${q>1?q+' × ':''}${f.m}</div></div>
+            <div class="cal">${Math.round(f.c*q)} kcal</div>
+            <button class="x" title="Remove" onclick="rmItem('${s.id}',${i})">×</button></div>`;}).join('')
+          :`<div style="font-size:12.5px;color:var(--faint);padding:6px 0">Nothing here yet.</div>`}
+        <div class="addbar">
+          <select id="sel-${s.id}">
+            <option value="">Add from your food list…</option>
+            ${[...new Set(FOODS.map(f=>f.g))].map(g=>`<optgroup label="${g}">
+              ${FOODS.filter(f=>f.g===g).map(f=>`<option value="${f.id}">${f.n} — ${f.m} · ${f.c} kcal</option>`).join('')}
+            </optgroup>`).join('')}
+          </select>
+          <button class="btn btn-gho btn-sm" onclick="addItem('${s.id}')">Add</button>
+        </div>
+      </div></div>`;
+  }).join('');
+}
+
+function renderPlanSide(){
+  const t=planTotals(PLAN_DRAFT), p=pat(CUR);
+  const target=Math.round((p.start-p.target)>12?1300:1450);
+  const diff=Math.round(t.c)-target;
+  return `<div class="card card-p" style="text-align:center">
+      <div class="eyebrow">The day adds up to</div>
+      <div style="display:grid;place-items:center;margin:14px 0 4px">${donut(t,152,22)}</div>
+      <div style="font-size:12.5px;color:${Math.abs(diff)<=80?'var(--green)':'var(--chilli)'};font-weight:700">
+        ${diff===0?'Exactly on target':diff>0?`${diff} kcal above your ${target} target`:`${-diff} kcal below your ${target} target`}</div>
+      <div style="margin-top:16px;text-align:left">
+        ${[['Protein',t.p,'#177A5C'],['Carbohydrate',t.cb,'#D99A24'],['Fat',t.f,'#C0503C'],['Fibre',t.fb,'#6B5CA5']]
+          .map(([k,v,c])=>`<div class="row" style="justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line)">
+          <div class="row" style="gap:7px"><i style="width:9px;height:9px;border-radius:3px;background:${c};display:block"></i>
+          <span style="font-size:12.5px;color:var(--muted);font-weight:600">${k}</span></div>
+          <b style="font-size:13px">${v} g</b></div>`).join('')}
+      </div>
+    </div>
+    <div class="card card-p" style="margin-top:16px">
+      <div class="eyebrow">Start from a template</div>
+      <div style="margin-top:11px;display:flex;flex-direction:column;gap:7px">
+        ${['1200 kcal vegetarian','PCOS — low glycaemic','Post-delivery 1500 kcal','Thyroid — steady loss']
+          .map(n=>`<button class="btn btn-gho btn-sm" style="justify-content:flex-start;width:100%"
+            onclick="toast('Template “${n}” loaded — now adjust it for her')">${n}</button>`).join('')}
+      </div>
+      <p style="font-size:11.5px;color:var(--faint);margin:13px 0 0;line-height:1.55">
+        Templates are where the time is saved. Build a plan once, reuse it for the next similar patient
+        in seconds.</p>
+    </div>
+    <div class="card card-p" style="margin-top:16px">
+      <div class="eyebrow">Exercises assigned</div>
+      <div style="margin-top:10px">${(PLAN_EX[CUR]||[]).map(id=>{const e=EXERCISES.find(x=>x.id===id);
+        return `<div style="padding:7px 0;border-bottom:1px dashed var(--line)">
+          <div style="font-size:12.8px;font-weight:600">${e.n}</div>
+          <div style="font-size:11.5px;color:var(--faint)">${e.d} · ${e.a}</div></div>`;}).join('')}</div>
+      <button class="btn btn-qui btn-sm" style="margin-top:9px" onclick="go('exercise')">Change these</button>
+    </div>`;
+}
+
+function refreshBuilder(){
+  const sw=$('slotWrap'), pw=$('sideWrap');
+  if(sw) sw.innerHTML=renderSlots();
+  if(pw) pw.innerHTML=renderPlanSide();
+}
+function addItem(sid){
+  const sel=$('sel-'+sid); const v=+sel.value; if(!v) return;
+  PLAN_DRAFT[sid]=PLAN_DRAFT[sid]||[];
+  const ex=PLAN_DRAFT[sid].find(x=>x[0]===v);
+  if(ex) ex[1]++; else PLAN_DRAFT[sid].push([v,1]);
+  refreshBuilder(); toast(food(v).n+' added');
+}
+function rmItem(sid,i){ PLAN_DRAFT[sid].splice(i,1); refreshBuilder(); }
+function issuePlan(){
+  const p=pat(CUR); PLANS[p.id]=JSON.parse(JSON.stringify(PLAN_DRAFT)); delete PLANS[p.id]._id;
+  toast(`Plan issued to ${p.n} — she can see it on her phone now`);
+  setTimeout(()=>go('patient',p.id),700);
+}
+function saveTemplate(){ toast('Saved as a template — reuse it for the next similar patient'); }
+
+/* ================= small interactions ================= */
+function filterPat(q){ q=q.toLowerCase();
+  document.querySelectorAll('#ptbody tr').forEach(r=>
+    r.style.display = r.dataset.n.includes(q)?'':'none');
+  document.querySelectorAll('#ptbody .mrow').forEach(r=>
+    r.style.display = r.textContent.toLowerCase().includes(q)?'':'none'); }
+function filterFood(q){ q=q.toLowerCase();
+  document.querySelectorAll('#ftbody tr, #ftbody .mrow').forEach(r=>
+    r.style.display = r.dataset.n.includes(q)?'':'none'); }
+function restore(i){ const r=RECYCLE.splice(i,1)[0];
+  toast(`Restored — ${r.what} is back in its place`); go('safety'); }
+function signout(){ window._in=false; setMode('doc'); }
+
+function askRestore(when){
+  $('modalHost').innerHTML=`<div class="modal-bg" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-h"><h3>Restore the copy from ${when}?</h3>
+        <p>Everything will go back to exactly how it was at that moment. Anything recorded since then
+           is saved to the recycle bin first, so nothing is lost either way.</p></div>
+      <div class="modal-b">
+        <label class="lbl">Type your clinic name to confirm</label>
+        <input class="inp" placeholder="Slim 'n Slender"></div>
+      <div class="modal-f">
+        <button class="btn btn-gho" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-pri" onclick="closeModal();toast('Restored from ${when}')">Restore</button></div>
+    </div></div>`;
+  applyLang();
+}
+function closeModal(e){ if(e && e.target!==e.currentTarget) return; $('modalHost').innerHTML=''; }
+
+/* re-render when the phone rotates or the window crosses the mobile breakpoint */
+let _wasMob=null;
+function onResize(){
+  const m=MOB();
+  if(_wasMob===m) return;
+  _wasMob=m;
+  const mn=$('mnav'); if(mn) mn.style.display=(MODE==='doc'&&window._in&&m)?'flex':'';
+  if(MODE==='doc'&&window._in) go(VIEW,CUR); else if(MODE==='pat') renderPat();
+}
+window.addEventListener('resize',onResize);
+window.addEventListener('orientationchange',()=>setTimeout(onResize,180));
+
+/* ================= PATIENT APP ================= */
+function openPat(v){ PAT_VIEW=v; setMode('pat'); }
+function pgo(v){ PAT_VIEW=v; renderPat(); const s=$('patScreen'); if(s) s.scrollTop=0; }
+
+function patTabs(){
+  const T=[['today','Today','M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z'],
+           ['progress','Progress','M3 17l6-6 4 4 8-8'],
+           ['history','My plans','M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z'],
+           ['money','Payments','M1 4h22v16H1zM1 10h22M6 15h4'],
+           ['exercise','Exercise','M23 7l-7 5 7 5zM14 5H3a2 2 0 00-2 2v10a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2z']];
+  return `<div class="ptabs">${T.map(([id,t,d])=>
+    `<button class="${PAT_VIEW===id||(id==='history'&&PAT_VIEW==='planview')?'on':''}" onclick="pgo('${id}')">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+        stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg><span>${t}</span></button>`).join('')}</div>`;
+}
+const pbar = `<div class="pstat"><span>9:41</span><span>▮▮▮ ⌁ 84%</span></div>`;
+
+function renderPat(){
+  const s=$('patScreen'); if(!s) return;
+  s.innerHTML = PAT[PAT_VIEW] ? PAT[PAT_VIEW]() : PAT.today();
+  applyLang();
+}
+
+const PAT = {
+
+login(){
+  return `${pbar}
+  <div style="padding:56px 26px 0;text-align:center">
+    <div class="brand-mark" style="width:62px;height:62px;border-radius:19px;font-size:27px;margin:0 auto">S</div>
+    <h1 style="font-family:var(--dis);font-size:26px;font-weight:600;margin:22px 0 6px;letter-spacing:-.5px">
+      Slim 'n Slender</h1>
+    <p style="color:var(--muted);font-size:13.5px;margin:0 0 30px">Dr. Nitee Gadhvi's clinic, Junagadh</p>
+    <div class="pcard" style="padding:20px;text-align:left">
+      <div class="field"><label class="lbl">Your mobile number</label>
+        <input class="inp" value="98251 44xxx" readonly></div>
+      <div class="field" style="margin-bottom:6px"><label class="lbl">6-digit PIN from the clinic</label>
+        <input class="inp" type="password" value="482913" readonly></div>
+      <button class="btn btn-pri" style="width:100%;justify-content:center;margin-top:12px"
+        onclick="pgo('today');toast('Signed in as Meera')">Open my plan</button>
+    </div>
+    <p style="font-size:11.5px;color:var(--faint);margin-top:20px;line-height:1.6">
+      Nothing to download. Tap "Add to Home Screen" once and this opens like any other app.</p>
+  </div>`;
+},
+
+today(){
+  const p=pat(PAT_ID), plan=PLANS[p.id], t=planTotals(plan);
+  const doneK = SLOTS.filter(s=>PAT_TICK[s.id]).reduce((a,s)=>a+slotTotal(plan[s.id]),0);
+  return `${pbar}
+  <div class="phead">
+    <div style="flex:1"><div class="eyebrow">Friday, 14 August</div>
+      <h2>Good morning, ${p.n.split(' ')[0]}</h2></div>
+    <div class="av-sm" style="width:38px;height:38px;background:${avc(p.id)[0]};color:${avc(p.id)[1]}">${ini(p.n)}</div>
+  </div>
+
+  <div class="psec">
+    <div class="pcard" style="padding:18px 16px;text-align:center">
+      <div style="display:grid;place-items:center">${thali(PAT_TICK, doneK, Math.round(t.c))}</div>
+      <p style="font-size:12px;color:var(--muted);margin:12px 0 0;line-height:1.5">
+        Tick each meal as you take it. Your doctor sees this at your next visit.</p>
+    </div>
+
+    <div class="eyebrow" style="margin:18px 0 9px">Your plan for today</div>
+    ${SLOTS.map(s=>{const items=plan[s.id]||[]; if(!items.length) return '';
+      const names=items.map(([fid,q])=>{const f=food(fid);return (q>1?q+' × ':'')+f.n;}).join(' · ');
+      return `<div class="pcard" style="margin-bottom:9px">
+        <div class="meal">
+          <button class="tick ${PAT_TICK[s.id]?'on':''}" onclick="event.stopPropagation();tick('${s.id}')">
+            ${PAT_TICK[s.id]?'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>':''}
+          </button>
+          <div style="flex:1;cursor:pointer" onclick="openMeal('${s.id}')">
+            <div class="slotname">${s.name} · ${s.time}</div>
+            <div class="items">${names}</div>
+            <div class="kcal">${slotTotal(items)} kcal</div>
+          </div>
+          <div class="chev">›</div>
+        </div></div>`;}).join('')}
+
+    <div class="pcard" style="padding:15px 16px;margin-top:4px;background:var(--green-tint)">
+      <div class="eyebrow">A note from your doctor</div>
+      <p style="font-size:13px;color:var(--ink2);margin:7px 0 0;line-height:1.6">
+        Keep the evening chana ready before you leave for work. That is the slot where the plan usually breaks.</p>
+    </div>
+    <div style="height:18px"></div>
+  </div>
+  ${patTabs()}`;
+},
+
+meal(){
+  const p=pat(PAT_ID), plan=PLANS[p.id], sid='ln', items=plan[sid]||[];
+  let t={c:0,p:0,cb:0,f:0,fb:0};
+  items.forEach(([fid,q])=>{const f=food(fid);t.c+=f.c*q;t.p+=f.p*q;t.cb+=f.cb*q;t.f+=f.f*q;t.fb+=f.fb*q;});
+  Object.keys(t).forEach(k=>t[k]=r1(t[k]));
+  const rec=RECIPES[2];
+  return `${pbar}
+  <div class="phead"><button class="pback" onclick="pgo('today')">‹</button><h2>Lunch</h2></div>
+  <div class="psec">
+    <div class="pcard" style="padding:20px 16px;text-align:center">
+      <div style="display:grid;place-items:center">${donut(t,168,24)}</div>
+      <div class="legend" style="justify-content:center;margin-top:16px">
+        <div><i style="background:#177A5C"></i>Protein ${t.p} g</div>
+        <div><i style="background:#D99A24"></i>Carbs ${t.cb} g</div>
+        <div><i style="background:#C0503C"></i>Fat ${t.f} g</div>
+      </div>
+      <div style="margin-top:12px;font-size:12px;color:var(--muted)">Fibre ${t.fb} g · 1:30 pm</div>
+    </div>
+
+    <div class="eyebrow" style="margin:18px 0 9px">What to eat</div>
+    ${items.map(([fid,q])=>{const f=food(fid);
+      return `<div class="pcard" style="padding:13px 15px;margin-bottom:8px">
+        <div class="row" style="gap:12px;align-items:center">
+          <div>${pie(f,56)}</div>
+          <div style="flex:1">
+          <div style="font-size:14px;font-weight:600">${f.n}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">${q>1?q+' × ':''}${f.m}</div></div>
+          <div style="text-align:right"><b style="font-size:14px">${Math.round(f.c*q)}</b>
+            <div style="font-size:10.5px;color:var(--faint);font-weight:700">KCAL</div></div></div>
+        <div class="row" style="gap:6px;margin-top:9px;flex-wrap:wrap">
+          <span class="pill p-grn">P ${r1(f.p*q)}</span><span class="pill p-tur">C ${r1(f.cb*q)}</span>
+          <span class="pill p-chi">F ${r1(f.f*q)}</span><span class="pill p-jam">Fibre ${r1(f.fb*q)}</span></div>
+      </div>`;}).join('')}
+
+    <div class="eyebrow" style="margin:18px 0 9px">How to make it</div>
+    <div class="pcard" style="padding:16px">
+      <b style="font-size:14px">${rec.n}</b>
+      <div style="font-size:11.5px;color:var(--faint);margin-top:2px">${rec.s} · ${rec.c} kcal</div>
+      <div class="eyebrow" style="margin-top:13px">What goes in</div>
+      <p style="font-size:12.5px;color:var(--ink2);margin:5px 0 0;line-height:1.6">${rec.ing}</p>
+      <div class="eyebrow" style="margin-top:12px">Method</div>
+      <p style="font-size:12.5px;color:var(--muted);margin:5px 0 0;line-height:1.6">${rec.mth}</p>
+    </div>
+
+    <button class="btn btn-pri" style="width:100%;justify-content:center;margin-top:14px"
+      onclick="tick('ln');pgo('today')">Mark lunch as taken</button>
+    <div style="height:18px"></div>
+  </div>
+  ${patTabs()}`;
+},
+
+progress(){
+  const p=pat(PAT_ID), wts=p.wts.map(x=>x.w);
+  return `${pbar}
+  <div class="phead"><div style="flex:1"><div class="eyebrow">Since ${p.since}</div><h2>Your progress</h2></div></div>
+  <div class="psec">
+    <div class="pcard" style="padding:20px 16px;text-align:center">
+      <div class="eyebrow">You have lost</div>
+      <div class="dnum" style="font-size:52px;color:var(--green);margin:8px 0 2px">${lost(p)}<span style="font-size:20px"> kg</span></div>
+      <div style="font-size:13px;color:var(--muted)">${p.start} kg when you started · ${curW(p)} kg today</div>
+      <div class="bar" style="margin-top:18px;height:11px"><i style="width:${goalPct(p)}%"></i></div>
+      <div class="row" style="justify-content:space-between;margin-top:8px">
+        <span style="font-size:11.5px;color:var(--faint);font-weight:700">${goalPct(p)}% OF YOUR GOAL</span>
+        <span style="font-size:11.5px;color:var(--faint);font-weight:700">${r1(curW(p)-p.target)} KG TO GO</span></div>
+    </div>
+
+    <div class="grid g2 keep2" style="gap:9px;margin-bottom:12px">
+      <div class="pcard" style="padding:14px;margin:0"><div class="k eyebrow">Per week</div>
+        <div class="dnum" style="font-size:24px;margin-top:6px">${perWk(p)} kg</div></div>
+      <div class="pcard" style="padding:14px;margin:0"><div class="k eyebrow">BMI now</div>
+        <div class="dnum" style="font-size:24px;margin-top:6px">${bmi(p)}</div></div>
+    </div>
+
+    <div class="pcard" style="padding:14px 6px 6px">
+      <div class="eyebrow" style="padding:0 10px 8px">Your weight, week by week</div>
+      ${lineChart(wts,MOB()?350:340,190,p.target)}
+    </div>
+
+    <div class="pcard" style="padding:14px 6px 10px">
+      <div class="eyebrow" style="padding:0 10px 8px">How well you followed the plan</div>
+      ${barChart(p.adh,340,170)}
+      <p style="font-size:12px;color:var(--muted);padding:6px 12px 0;margin:0;line-height:1.5">
+        Week 4 dipped because of the wedding season. Everything since has been steady.</p>
+    </div>
+    <div style="height:18px"></div>
+  </div>
+  ${patTabs()}`;
+},
+
+history(){
+  const p=pat(PAT_ID), H=planHistory(p);
+  return `${pbar}
+  <div class="phead"><div style="flex:1"><div class="eyebrow">Nothing is ever deleted</div><h2>My plans</h2></div></div>
+  <div class="psec">
+    <p style="font-size:13px;color:var(--muted);margin:0 0 16px;line-height:1.6">
+      Every plan you have been given is kept here, from your first visit on ${p.since} until today —
+      ${H.length} visits in all.</p>
+    ${H.map((x,i)=>`<div class="pcard" style="padding:15px 16px;${i===0?'border-color:#7FC0A9;background:var(--green-tint)':''}">
+      <div class="row"><div style="flex:1">
+        <div class="row" style="gap:8px"><b style="font-size:13.5px">${x.date}</b>
+          ${i===0?'<span class="pill p-grn">Running now</span>':''}</div>
+        <div style="font-size:12.5px;color:var(--muted);margin-top:3px">${x.note}</div>
+        <div style="font-size:11.5px;color:var(--faint);margin-top:3px">Weight that day ${x.wt} kg</div></div>
+      <div style="text-align:right"><b style="font-size:15px">${x.kcal}</b>
+        <div style="font-size:10.5px;color:var(--faint);font-weight:700">KCAL</div></div></div>
+      <div class="row" style="gap:7px;margin-top:11px">
+        <button class="btn btn-gho btn-sm" style="flex:1;justify-content:center"
+          onclick="openOldPlan(${i})">View this plan</button>
+        <button class="btn btn-gho btn-sm" onclick="printPlan(${i},'pat')">PDF</button></div>
+    </div>`).join('')}
+    <div style="height:18px"></div>
+  </div>
+  ${patTabs()}`;
+},
+
+/* one old plan, exactly as it was on that date */
+planview(){
+  const p=pat(PAT_ID), H=planHistory(p), x=H[Math.min(PAT_PLAN,H.length-1)];
+  const t=planTotals(x.plan);
+  return `${pbar}
+  <div class="phead"><button class="pback" onclick="pgo('history')">‹</button><h2>${x.date}</h2></div>
+  <div class="psec">
+    <div class="pcard" style="padding:16px;text-align:center">
+      <div style="display:grid;place-items:center">${donut(t,150,22)}</div>
+      <div class="legend" style="justify-content:center;margin-top:14px">
+        <div><i style="background:#177A5C"></i>Protein ${t.p} g</div>
+        <div><i style="background:#D99A24"></i>Carbs ${t.cb} g</div>
+        <div><i style="background:#C0503C"></i>Fat ${t.f} g</div></div>
+      <div style="margin-top:10px;font-size:12px;color:var(--muted)">Fibre ${t.fb} g · weight that day ${x.wt} kg</div>
+    </div>
+    <div class="pcard" style="padding:13px 15px;margin-top:10px;background:var(--turmeric-soft);border-color:#EBD9B4">
+      <p style="font-size:12.5px;color:#7A5209;margin:0;line-height:1.6">${x.note}</p></div>
+    <div class="eyebrow" style="margin:18px 0 9px">What you were eating then</div>
+    ${SLOTS.map(sl=>{
+      const items=(x.plan[sl.id]||[]);
+      return `<div class="pcard" style="padding:13px 15px;margin-bottom:8px">
+        <div class="row"><b style="font-size:13px;flex:1">${sl.name}</b>
+          <span class="pill p-gry">${sl.time}</span></div>
+        <div style="font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.6">${
+          items.length? items.map(([fid,q])=>esc(food(fid).n)+(q>1?' \u00D7 '+q:'')).join(', ') : '—'}</div></div>`;
+    }).join('')}
+    <button class="btn btn-pri" style="width:100%;justify-content:center;margin-top:14px"
+      onclick="printPlan(${Math.min(PAT_PLAN,H.length-1)},'pat')">Download this chart as PDF</button>
+    <button class="btn btn-gho" style="width:100%;justify-content:center;margin-top:8px"
+      onclick="viewPlan(${Math.min(PAT_PLAN,H.length-1)},'pat')">See it as a printed chart</button>
+    <div style="height:18px"></div>
+  </div>
+  ${patTabs()}`;
+},
+
+/* what she has paid and what is due */
+money(){
+  const p=pat(PAT_ID), L=ledger(p), H=planHistory(p);
+  const paidRows=[]; for(let c=L.paidCy;c>0;c--) paidRows.push({c, date:d2s(visitDate(p,c*CYCLE-1))});
+  return `${pbar}
+  <div class="phead"><div style="flex:1"><div class="eyebrow">Your account</div><h2>Payments</h2></div></div>
+  <div class="psec">
+    <div class="pcard" style="padding:18px 16px;text-align:center;${L.dueNow>0?'border-color:#E4B5A8;background:#FDF3F0':'border-color:#7FC0A9;background:var(--green-tint)'}">
+      <div style="font-size:12px;color:var(--muted);font-weight:600">${L.dueNow>0?'To be paid':'Nothing pending'}</div>
+      <div style="font-family:var(--dis);font-size:34px;font-weight:600;margin-top:4px;
+        color:${L.dueNow>0?'var(--chilli)':'var(--green)'}">${INR(L.dueNow)}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:5px">
+        ${L.dueNow>0? 'A cycle of '+CYCLE+' diet plans is complete' : 'Your account is fully cleared'}</div>
+    </div>
+    <div class="pcard" style="padding:15px 16px;margin-top:10px">
+      <div class="row" style="justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line)">
+        <span style="font-size:12.5px;color:var(--muted)">Diet plans given</span><b style="font-size:13px">${L.plans}</b></div>
+      <div class="row" style="justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line)">
+        <span style="font-size:12.5px;color:var(--muted)">Charge per plan</span><b style="font-size:13px">${INR(PLAN_FEE)}</b></div>
+      <div class="row" style="justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line)">
+        <span style="font-size:12.5px;color:var(--muted)">Paid till date</span><b style="font-size:13px">${INR(L.paid)}</b></div>
+      <div class="row" style="justify-content:space-between;padding:6px 0">
+        <span style="font-size:12.5px;color:var(--muted)">This cycle so far</span>
+        <b style="font-size:13px">${L.inCycle} of ${CYCLE} plans</b></div>
+    </div>
+    <div class="pcard" style="padding:15px 16px;margin-top:10px">
+      <div class="row"><div style="flex:1"><div class="eyebrow">Your next visit</div>
+        <b style="font-size:15px;display:block;margin-top:4px">${nextVisit(p)}</b>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Weighing and plan review</div></div>
+        <div style="width:52px;height:52px;border-radius:15px;background:var(--green-soft);display:grid;
+          place-items:center;font-family:var(--dis);font-size:20px;font-weight:600;color:var(--neem)">${nextVisit(p).split(' ')[0]}</div></div>
+    </div>
+    <div class="eyebrow" style="margin:18px 0 9px">Receipts</div>
+    ${paidRows.length? paidRows.map(r=>`<div class="pcard" style="padding:13px 15px;margin-bottom:8px">
+      <div class="row"><div style="flex:1"><b style="font-size:13px">${r.date}</b>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Plans ${(r.c-1)*CYCLE+1} to ${r.c*CYCLE} · ${L.mode}</div></div>
+        <b style="font-size:14px;color:var(--green)">${INR(CYCLE*PLAN_FEE)}</b></div></div>`).join('')
+      : `<div class="pcard" style="padding:15px 16px"><p style="font-size:12.5px;color:var(--muted);margin:0">
+           No payment recorded yet.</p></div>`}
+    <div class="pcard" style="padding:15px 16px;background:var(--turmeric-soft);border-color:#EBD9B4">
+      <p style="font-size:12.5px;color:#7A5209;margin:0;line-height:1.6">
+        Consultation charges are billed separately at the clinic counter and are not shown here.</p></div>
+    <div style="height:18px"></div>
+  </div>
+  ${patTabs()}`;
+},
+
+exercise(){
+  const list=(PLAN_EX[PAT_ID]||[]).map(id=>EXERCISES.find(e=>e.id===id));
+  return `${pbar}
+  <div class="phead"><div style="flex:1"><div class="eyebrow">Assigned by Dr. Nitee</div><h2>Your exercise</h2></div></div>
+  <div class="psec">
+    ${list.map(e=>`<div class="pcard">
+      <div style="height:150px;background:linear-gradient(135deg,#0E5642,#1F8C68);display:grid;place-items:center;position:relative">
+        <button style="width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.95);display:grid;place-items:center"
+          onclick="toast('The video would play here — unlisted on the clinic channel')">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="#0E5642"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="pill" style="position:absolute;top:11px;right:11px;background:rgba(0,0,0,.42);color:#fff">${e.d}</span>
+      </div>
+      <div style="padding:15px 16px 17px">
+        <b style="font-size:15px">${e.n}</b>
+        <div class="row" style="gap:7px;margin-top:8px"><span class="pill p-inf">${e.a}</span>
+          <span class="pill p-gry">${e.d}</span></div>
+        <p style="font-size:12.5px;color:var(--muted);margin:11px 0 0;line-height:1.6">${e.note}</p>
+      </div></div>`).join('')}
+    <div class="pcard" style="padding:15px 16px;background:var(--turmeric-soft);border-color:#EBD9B4">
+      <p style="font-size:12.5px;color:#7A5209;margin:0;line-height:1.6">
+        These videos are on your doctor's own channel and cannot be found by searching YouTube.
+        Only the link she gave you opens them.</p></div>
+    <div style="height:18px"></div>
+  </div>
+  ${patTabs()}`;
+}
+
+};
+
+function tick(sid){ PAT_TICK[sid]=!PAT_TICK[sid]; renderPat(); }
+function openOldPlan(i){ PAT_PLAN=i; PAT_VIEW='planview'; renderPat(); const s=$('patScreen'); if(s) s.scrollTop=0; }
+function openMeal(sid){ PAT_VIEW='meal'; renderPat(); }
+
+/* ================= boot ================= */
+PAT_TICK={em:true, bf:true, mm:true};
+_wasMob=MOB();
+paintNav(); paintMNav();
+setMode('doc');
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+</script>
+</body>
+</html>
